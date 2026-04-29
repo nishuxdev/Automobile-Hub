@@ -1,0 +1,49 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+
+venv/
+
+# Environment Variables
+
+.env
+
+# Django
+
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Migrations cache
+
+**/migrations/**pycache**/
+
+# Logs & temp
+
+*.log
+*.tmp
+*.swp
+
+# Build files
+
+build/
+dist/
+*.egg-info/
+
+# IDE & OS
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AI / Models
+
+*.bin
+*.pt
+*.gguf
