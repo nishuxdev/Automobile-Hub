@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automobile Hub — Verified bike service, on demand</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+      :root {
+        --background: 240 60% 6%;
+        --foreground: 230 40% 96%;
+        --card: 240 50% 9%;
+        --card-foreground: 230 40% 96%;
+        --primary: 243 75% 59%;
+        --primary-foreground: 230 40% 98%;
+        --primary-glow: 252 95% 72%;
+        --muted: 240 35% 14%;
+        --muted-foreground: 230 20% 65%;
+        --accent: 252 95% 72%;
+        --border: 240 40% 18%;
+        --radius: 0.875rem;
+        --surface: 240 55% 10%;
+        --surface-elevated: 240 50% 13%;
+        --hairline: 240 35% 22%;
+        --gradient-hero: radial-gradient(ellipse at top, hsl(243 75% 25% / 0.55), transparent 60%), radial-gradient(ellipse at bottom right, hsl(252 95% 45% / 0.35), transparent 55%), linear-gradient(180deg, hsl(240 60% 6%), hsl(240 65% 4%));
+        --gradient-primary: linear-gradient(135deg, hsl(243 75% 59%), hsl(252 95% 72%));
+        --gradient-text: linear-gradient(135deg, hsl(230 40% 98%) 0%, hsl(252 95% 82%) 50%, hsl(243 90% 70%) 100%);
+        --gradient-border: linear-gradient(135deg, hsl(243 75% 59% / 0.6), hsl(252 95% 72% / 0.1));
+        --shadow-glow: 0 0 80px hsl(243 75% 59% / 0.35);
+        --shadow-elegant: 0 30px 80px -20px hsl(240 80% 2% / 0.7);
+        --shadow-card: 0 20px 50px -25px hsl(243 75% 30% / 0.5);
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: var(--gradient-hero);
+        background-attachment: fixed;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Syne', sans-serif;
+        letter-spacing: -0.02em;
+      }
+      ::selection {
+        background: hsl(var(--primary) / 0.4);
+        color: hsl(var(--foreground));
+      }
+    }
+    @layer components {
+      .text-gradient { background: var(--gradient-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .glass-panel { background: hsl(var(--surface) / 0.6); backdrop-filter: blur(20px); border: 1px solid hsl(var(--hairline) / 0.6); }
+      .glow-border { position: relative; background: hsl(var(--surface)); border-radius: var(--radius); }
+      .glow-border::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--gradient-border); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; pointer-events: none; }
+      .grid-bg { background-image: linear-gradient(hsl(var(--hairline) / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--hairline) / 0.35) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 80%); }
+      .pulse-dot { position: relative; }
+      .pulse-dot::after { content: ''; position: absolute; inset: -4px; border-radius: 9999px; background: hsl(var(--primary) / 0.5); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+      .aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+      .aurora::before, .aurora::after { content: ''; position: absolute; width: 60vw; height: 60vw; border-radius: 50%; filter: blur(120px); opacity: 0.55; mix-blend-mode: screen; animation: aurora-float 18s ease-in-out infinite; }
+      .aurora::before { top: -20%; left: -10%; background: radial-gradient(circle, hsl(243 90% 55% / 0.6), transparent 65%); }
+      .aurora::after { bottom: -25%; right: -10%; background: radial-gradient(circle, hsl(280 95% 65% / 0.5), transparent 65%); animation-delay: -9s; }
+      .scanline { background: linear-gradient(180deg, transparent 0%, hsl(var(--primary-glow) / 0.18) 50%, transparent 100%); }
+      .ring-orbit { position: absolute; border-radius: 50%; border: 1px solid hsl(var(--primary-glow) / 0.18); animation: orbit-spin 40s linear infinite; }
+      .noise-overlay { position: absolute; inset: 0; pointer-events: none; opacity: 0.04; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+    }
+    @keyframes aurora-float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(8%, -6%) scale(1.15); } }
+    @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+  </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: { display: ['Syne', 'sans-serif'], body: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        surface: "hsl(var(--surface))", "surface-elevated": "hsl(var(--surface-elevated))",
+                        hairline: "hsl(var(--hairline))", "primary-glow": "hsl(var(--primary-glow))",
+                        border: "hsl(var(--border))", primary: "hsl(var(--primary))",
+                        "primary-foreground": "hsl(var(--primary-foreground))", muted: "hsl(var(--muted))",
+                        "muted-foreground": "hsl(var(--muted-foreground))", accent: "hsl(var(--accent))",
+                        background: "hsl(var(--background))", foreground: "hsl(var(--foreground))"
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'var(--gradient-primary)',
+                        'gradient-hero': 'var(--gradient-hero)',
+                        'gradient-text': 'var(--gradient-text)',
+                    },
+                    boxShadow: { glow: 'var(--shadow-glow)', elegant: 'var(--shadow-elegant)', card: 'var(--shadow-card)' }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-background text-foreground antialiased relative min-h-screen overflow-x-hidden">
+
+    <!-- Nav -->
+    <header class="fixed top-0 inset-x-0 z-50 transition-all duration-500 ease-smooth py-5">
+        <div class="container max-w-7xl mx-auto px-6">
+            <nav
+                class="flex items-center justify-between rounded-2xl px-5 py-3 transition-all duration-500 ease-smooth glass-panel shadow-elegant">
+                <a href="#" class="flex items-center gap-2.5">
+                    <img src="/static/images/logo_motorcycle.png" alt="AutoMobile Hub Logo"
+                        class="w-14 h-10 object-contain drop-shadow-[0_0_8px_hsl(252,95%,82%)]">
+                    <span class="font-display font-bold text-lg tracking-tight">Automobile Hub</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+                    <a href="#features" class="hover:text-foreground transition-colors">Features</a>
+                    <a href="#services" class="hover:text-foreground transition-colors">Services</a>
+                    <a href="#how" class="hover:text-foreground transition-colors">How it works</a>
+                    <a href="#mechanics" class="hover:text-foreground transition-colors">For mechanics</a>
+                    <a href="#contact" class="hover:text-foreground transition-colors">Contact</a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'login' %}"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-surface-elevated hover:text-accent-foreground h-9 px-3 hidden sm:inline-flex">Sign
+                        in</a>
+                    <a href="{% url 'signup' %}"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-primary-foreground shadow h-9 px-3 bg-gradient-primary hover:opacity-90 shadow-glow">Sign
+                        up</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative min-h-screen pt-32 pb-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+        <div
+            class="bg-blob-1 absolute top-1/4 -left-40 w-[500px] h-[500px] rounded-full bg-primary/25 blur-[120px] pointer-events-none">
+        </div>
+        <div
+            class="bg-blob-2 absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full bg-primary-glow/20 blur-[140px] pointer-events-none">
+        </div>
+        <div
+            class="bg-blob-3 absolute top-1/2 left-1/3 w-[400px] h-[400px] rounded-full bg-accent/15 blur-[120px] pointer-events-none">
+        </div>
+        <div class="absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <div class="ring-orbit w-[680px] h-[680px] -translate-x-1/2 -translate-y-1/2"></div>
+            <div
+                class="ring-orbit orbit-rev w-[920px] h-[920px] -translate-x-1/2 -translate-y-1/2 border-dashed border-t-2">
+            </div>
+            <div class="ring-orbit w-[1160px] h-[1160px] -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+        <div class="noise-overlay"></div>
+        <div class="container max-w-7xl mx-auto relative">
+            <div class="max-w-4xl mx-auto text-center">
+                <div
+                    class="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel text-xs font-medium mb-8">
+                    <span class="relative w-2 h-2 rounded-full bg-primary pulse-dot"></span>
+                    <span class="text-muted-foreground">Now live in 47 cities</span>
+                    <span class="text-primary-glow font-mono">→</span>
+                </div>
+                <h1
+                    class="font-display font-bold tracking-tight text-3xl sm:text-5xl md:text-7xl lg:text-[88px] leading-[0.95] mb-8">
+                    <div class="hero-line">Bike service,</div>
+                    <div class="hero-line text-gradient">reimagined for speed.</div>
+                </h1>
+                <p class="hero-sub text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Automobile Hub connects riders with verified mechanics in seconds — transparent pricing, real-time
+                    tracking
+                    and a service experience built for the next decade.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center mb-16">
+                    <a href="{% url 'login' %}"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-primary-foreground hero-cta h-12 px-7 bg-gradient-primary hover:opacity-90 shadow-glow group">
+                        Book a service <i data-lucide="arrow-right"
+                            class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="{% url 'signup' %}"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border bg-background hover:text-accent-foreground hero-cta h-12 px-7 glass-panel hover:bg-surface-elevated border-hairline">
+                        <i data-lucide="wrench" class="mr-2 w-4 h-4"></i> Join as mechanic
+                    </a>
+                </div>
+                <div
+                    class="hero-meta flex items-center justify-center gap-8 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    <span>OTP secured</span><span class="w-1 h-1 rounded-full bg-hairline"></span>
+                    <span>24/7 support</span><span class="w-1 h-1 rounded-full bg-hairline"></span>
+                    <span>Verified pros</span>
+                </div>
+            </div>
+            <div class="relative mt-12 md:mt-24 max-w-5xl mx-auto">
+                <div class="hero-image relative rounded-3xl overflow-hidden glow-border shadow-elegant">
+                    <img src="static/images/HeroBike.jpeg" alt="Hero Bike" class="w-full h-auto">
+                    <div class="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent">
+                    </div>
+                    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div class="scan-sweep scanline absolute inset-x-0 h-32"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="relative py-20 px-6 border-y border-hairline/50">
+        <div class="container max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="stat-item text-center">
+                <div class="text-4xl md:text-6xl font-display font-bold text-gradient mb-2">12k+</div>
+                <div class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Active drivers</div>
+            </div>
+            <div class="stat-item text-center">
+                <div class="text-4xl md:text-6xl font-display font-bold text-gradient mb-2">1.8k</div>
+                <div class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Verified mechanics</div>
+            </div>
+            <div class="stat-item text-center">
+                <div class="text-4xl md:text-6xl font-display font-bold text-gradient mb-2">47</div>
+                <div class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Cities served</div>
+            </div>
+            <div class="stat-item text-center">
+                <div class="text-4xl md:text-6xl font-display font-bold text-gradient mb-2">4.9★</div>
+                <div class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Avg. rating</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="relative py-20 md:py-32 px-6">
+        <div class="container max-w-7xl mx-auto">
+            <div class="max-w-2xl mb-20">
+                <span class="inline-block text-xs uppercase tracking-[0.3em] text-primary-glow mb-5">/
+                    Capabilities</span>
+                <h2 class="text-4xl md:text-6xl font-display font-bold leading-[1.05] mb-6">Built for the <span
+                        class="text-gradient">modern garage</span> and the modern driver.</h2>
+                <p class="text-lg text-muted-foreground">A unified service stack — discovery, booking, payments and
+                    trust —
+                    engineered into a single seamless flow.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">Verified Mechanics</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Every mechanic is vetted with KYC and
+                            skill
+                            verification before going live.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">01 / 06</div>
+                    </div>
+                </div>
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">Location Matching</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Smart proximity engine finds the
+                            closest available
+                            expert in seconds.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">02 / 06</div>
+                    </div>
+                </div>
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="wrench" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">On-Demand Repair</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">From routine service to roadside
+                            emergencies — one
+                            tap away, 24/7.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">03 / 06</div>
+                    </div>
+                </div>
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="gauge" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">Live Booking Status</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Track your service lifecycle from
+                            pending to
+                            completed in real time.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">04 / 06</div>
+                    </div>
+                </div>
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="star" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">Reliability Score</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Mechanic ratings recompute continuously
+                            based on
+                            real customer feedback.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">05 / 06</div>
+                    </div>
+                </div>
+                <div
+                    class="feat-card group relative p-8 rounded-[var(--radius)] glass-panel hover:border-primary/40 transition-all duration-500 ease-smooth hover:-translate-y-1 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 mb-6 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                            <i data-lucide="zap" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold mb-3">Subscription Plans</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Priority booking, scheduled checkups
+                            and discounted
+                            pricing — monthly.</p>
+                        <div class="mt-6 text-xs font-mono text-primary-glow/70">06 / 06</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services" class="relative py-20 md:py-32 px-6 overflow-hidden">
+        <div class="aurora opacity-40"></div>
+        <div class="container max-w-7xl mx-auto relative">
+            <div class="max-w-2xl mb-16 text-center mx-auto">
+                <span class="inline-block text-xs uppercase tracking-[0.3em] text-primary-glow mb-5">/ Our
+                    Services</span>
+                <h2 class="text-4xl md:text-6xl font-display font-bold leading-[1.05] mb-6">Every fix your <span
+                        class="text-gradient">bike will ever need.</span></h2>
+                <p class="text-lg text-muted-foreground">From quick chain lube to full engine rebuilds — book any
+                    service in two
+                    taps and track it live.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="cog" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">General Servicing</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Periodic checkups, oil change,
+                            filter
+                            replacement and tuning.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="disc-3" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Brake & Clutch</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Pad replacement, fluid bleed and
+                            clutch cable
+                            adjustment.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="battery" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Battery & Electrical</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Battery health, wiring, headlamp
+                            and indicator
+                            diagnostics.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="droplets" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Engine Oil Change</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Premium synthetic oils with
+                            manufacturer-grade
+                            filters.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="bike" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Tyre & Wheel</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Tyre swap, alignment, balancing
+                            and puncture
+                            repair.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Detailing & Wash</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">Foam wash, ceramic polish and
+                            chain
+                            lubrication.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="life-buoy" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Roadside Assistance</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">24/7 SOS for breakdowns, towing
+                            and on-spot
+                            fixes.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="svc-card group relative p-6 rounded-[var(--radius)] glass-panel hover:border-primary/50 transition-all duration-500 ease-smooth hover:-translate-y-1.5 hover:shadow-card overflow-hidden">
+                    <div
+                        class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/15 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                    </div>
+                    <div class="relative">
+                        <div
+                            class="w-11 h-11 mb-5 rounded-xl bg-gradient-primary/90 flex items-center justify-center shadow-glow">
+                            <i data-lucide="gauge" class="w-5 h-5 text-primary-foreground stroke-[2.2]"></i>
+                        </div>
+                        <h3 class="text-base font-display font-semibold mb-2">Performance Tuning</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed mb-4">ECU remap, exhaust check and
+                            dyno-grade
+                            tuning.</p>
+                        <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
+                            <span
+                                class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
+                                →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how" class="relative py-20 md:py-32 px-6">
+        <div class="container max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-start">
+            <div class="lg:sticky lg:top-32">
+                <span class="inline-block text-xs uppercase tracking-[0.3em] text-primary-glow mb-5">/ Workflow</span>
+                <h2 class="text-4xl md:text-6xl font-display font-bold leading-[1.05] mb-6">From breakdown to back on
+                    the road
+                    in <span class="text-gradient">four steps.</span></h2>
+                <p class="text-lg text-muted-foreground max-w-md">We replaced the chaos of phone calls and uncertain
+                    pricing
+                    with a transparent, status-driven booking flow.</p>
+            </div>
+            <div class="relative">
+                <div
+                    class="absolute left-[26px] top-2 bottom-2 w-px bg-gradient-to-b from-primary via-primary-glow/40 to-transparent">
+                </div>
+                <div class="space-y-10">
+                    <div class="step-row flex gap-6">
+                        <div
+                            class="relative z-10 flex-shrink-0 w-[54px] h-[54px] rounded-2xl glass-panel flex items-center justify-center font-mono text-sm text-primary-glow shadow-glow">
+                            01</div>
+                        <div class="pt-2">
+                            <h3 class="text-xl md:text-2xl font-display font-semibold mb-2">Sign in & verify</h3>
+                            <p class="text-muted-foreground leading-relaxed">Quick OTP-based onboarding for customers
+                                and mechanics.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="step-row flex gap-6">
+                        <div
+                            class="relative z-10 flex-shrink-0 w-[54px] h-[54px] rounded-2xl glass-panel flex items-center justify-center font-mono text-sm text-primary-glow shadow-glow">
+                            02</div>
+                        <div class="pt-2">
+                            <h3 class="text-xl md:text-2xl font-display font-semibold mb-2">Describe the issue</h3>
+                            <p class="text-muted-foreground leading-relaxed">Add photos, location and the kind of
+                                service you need.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="step-row flex gap-6">
+                        <div
+                            class="relative z-10 flex-shrink-0 w-[54px] h-[54px] rounded-2xl glass-panel flex items-center justify-center font-mono text-sm text-primary-glow shadow-glow">
+                            03</div>
+                        <div class="pt-2">
+                            <h3 class="text-xl md:text-2xl font-display font-semibold mb-2">Get matched instantly</h3>
+                            <p class="text-muted-foreground leading-relaxed">Our engine ranks nearby mechanics by
+                                reliability and
+                                proximity.</p>
+                        </div>
+                    </div>
+                    <div class="step-row flex gap-6">
+                        <div
+                            class="relative z-10 flex-shrink-0 w-[54px] h-[54px] rounded-2xl glass-panel flex items-center justify-center font-mono text-sm text-primary-glow shadow-glow">
+                            04</div>
+                        <div class="pt-2">
+                            <h3 class="text-xl md:text-2xl font-display font-semibold mb-2">Track & rate</h3>
+                            <p class="text-muted-foreground leading-relaxed">Live status updates, transparent pricing,
+                                secure payments
+                                and feedback.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Mechanics -->
+    <section id="mechanics" class="relative py-20 md:py-32 px-6">
+        <div class="container max-w-7xl mx-auto">
+            <div class="relative rounded-[28px] glow-border p-10 md:p-16 overflow-hidden">
+                <div class="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-primary/30 blur-[120px]">
+                </div>
+                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-primary-glow/20 blur-[100px]">
+                </div>
+                <div class="relative grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <span class="mech-el inline-block text-xs uppercase tracking-[0.3em] text-primary-glow mb-5">/
+                            For
+                            Mechanics</span>
+                        <h2 class="mech-el text-4xl md:text-5xl font-display font-bold leading-[1.05] mb-6">Grow your
+                            garage with a
+                            <span class="text-gradient">platform that works for you.</span>
+                        </h2>
+                        <p class="mech-el text-lg text-muted-foreground mb-8 max-w-lg">Get verified once, then receive
+                            matched
+                            service requests from drivers in your area — no marketing, no chasing, no overhead.</p>
+                        <div class="mech-el flex gap-3">
+                            <a href="{% url 'login' %}"
+                                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-primary-foreground h-12 px-7 bg-gradient-primary hover:opacity-90 shadow-glow group">
+                                Apply as mechanic <i data-lucide="arrow-right"
+                                    class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="mech-el space-y-4">
+                        <li class="flex items-start gap-4 p-5 rounded-2xl glass-panel"><i data-lucide="check-circle-2"
+                                class="w-5 h-5 mt-0.5 text-primary-glow flex-shrink-0"></i>
+                            <div>
+                                <div class="font-semibold text-foreground">Reach customers in your service radius</div>
+                                <div class="text-xs text-muted-foreground mt-1 font-mono">benefit · 01</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 p-5 rounded-2xl glass-panel"><i data-lucide="check-circle-2"
+                                class="w-5 h-5 mt-0.5 text-primary-glow flex-shrink-0"></i>
+                            <div>
+                                <div class="font-semibold text-foreground">Reliability score boosts your visibility
+                                </div>
+                                <div class="text-xs text-muted-foreground mt-1 font-mono">benefit · 02</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 p-5 rounded-2xl glass-panel"><i data-lucide="check-circle-2"
+                                class="w-5 h-5 mt-0.5 text-primary-glow flex-shrink-0"></i>
+                            <div>
+                                <div class="font-semibold text-foreground">Instant payments after service completion
+                                </div>
+                                <div class="text-xs text-muted-foreground mt-1 font-mono">benefit · 03</div>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 p-5 rounded-2xl glass-panel"><i data-lucide="check-circle-2"
+                                class="w-5 h-5 mt-0.5 text-primary-glow flex-shrink-0"></i>
+                            <div>
+                                <div class="font-semibold text-foreground">Dashboard with bookings, earnings, ratings
+                                </div>
+                                <div class="text-xs text-muted-foreground mt-1 font-mono">benefit · 04</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Map -->
+    <section id="contact" class="relative py-20 md:py-32 px-6 overflow-hidden">
+        <div
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-primary/15 blur-[140px] pointer-events-none">
+        </div>
+        <div class="container max-w-7xl mx-auto relative">
+            <div class="max-w-2xl mb-16">
+                <span class="contact-el inline-block text-xs uppercase tracking-[0.3em] text-primary-glow mb-5">/ Get in
+                    touch</span>
+                <h2 class="contact-el text-4xl md:text-6xl font-display font-bold leading-[1.05] mb-6">Find a hub near
+                    you, or
+                    <span class="text-gradient">drop us a line.</span>
+                </h2>
+                <p class="contact-el text-lg text-muted-foreground">Visit one of our flagship service centres or send a
+                    request
+                    and we'll dispatch the nearest verified mechanic to you.</p>
+            </div>
+            <div class="grid lg:grid-cols-5 gap-6">
+                <div
+                    class="contact-el lg:col-span-3 relative rounded-[var(--radius)] overflow-hidden glow-border min-h-[480px]">
+                    <iframe title="Automobile Hub locations"
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=77.5%2C12.85%2C77.75%2C13.05&layer=mapnik"
+                        class="absolute inset-0 w-full h-full grayscale-[0.3] contrast-110"
+                        style="filter: invert(0.92) hue-rotate(180deg) saturate(0.6) brightness(0.95)"
+                        loading="lazy"></iframe>
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40 pointer-events-none">
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                        <div class="relative">
+                            <div class="map-pin-pulse absolute inset-0 rounded-full bg-primary-glow/60"></div>
+                            <div
+                                class="relative w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-primary-foreground"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-5 left-5 right-5 glass-panel rounded-2xl p-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <div class="text-xs uppercase tracking-[0.2em] text-primary-glow mb-1">Headquarters
+                                </div>
+                                <div class="font-display font-semibold text-lg">Bengaluru · Koramangala</div>
+                                <div class="text-sm text-muted-foreground">100ft Road, 4th Block — open 24/7</div>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs text-muted-foreground">
+                                <div class="flex items-center gap-1.5"><i data-lucide="phone"
+                                        class="w-3.5 h-3.5 text-primary-glow"></i>
+                                    +91 80 4567 8910</div>
+                                <div class="flex items-center gap-1.5"><i data-lucide="clock"
+                                        class="w-3.5 h-3.5 text-primary-glow"></i>
+                                    24/7</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-el lg:col-span-2 glass-panel rounded-[var(--radius)] p-7 space-y-4">
+                    <div>
+                        <h3 class="font-display font-semibold text-2xl mb-1">Request a service</h3>
+                        <p class="text-sm text-muted-foreground">We'll respond within an hour.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div><label class="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 block">Name
+                                *</label><input type="text" placeholder="Your full name"
+                                class="flex h-9 w-full rounded-md border bg-surface-elevated/50 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 border-hairline focus:border-primary">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label
+                                    class="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 block">Email
+                                    *</label><input type="email" placeholder="you@email.com"
+                                    class="flex h-9 w-full rounded-md border bg-surface-elevated/50 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 border-hairline focus:border-primary">
+                            </div>
+                            <div><label
+                                    class="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 block">Phone</label><input
+                                    type="text" placeholder="+91"
+                                    class="flex h-9 w-full rounded-md border bg-surface-elevated/50 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 border-hairline focus:border-primary">
+                            </div>
+                        </div>
+                        <div><label class="text-xs uppercase tracking-wider text-muted-foreground mb-1.5 block">Message
+                                *</label><textarea placeholder="Describe your bike issue or service need..." rows="4"
+                                class="flex min-h-[60px] w-full rounded-md border bg-surface-elevated/50 px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 border-hairline focus:border-primary resize-none"></textarea>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-primary-foreground w-full h-12 bg-gradient-primary hover:opacity-90 shadow-glow group">
+                        Send request <i data-lucide="send"
+                            class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <div
+                        class="pt-3 border-t border-hairline/50 flex items-center justify-between text-xs text-muted-foreground">
+                        <span class="flex items-center gap-1.5"><i data-lucide="mail"
+                                class="w-3.5 h-3.5 text-primary-glow"></i>
+                            hello@autohub.io</span><span class="font-mono">avg. response · 12 min</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative px-6 pt-20 pb-10 border-t border-hairline/50">
+        <div class="container max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-10 mb-16">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="/static/images/logo_motorcycle.png" alt="AutoMobile Hub Logo"
+                            class="w-14 h-10 object-contain drop-shadow-[0_0_8px_hsl(252,95%,82%)]">
+                        <span class="font-display font-bold text-lg tracking-tight">Automobile Hub</span>
+                    </div>
+                    <p class="text-muted-foreground text-sm max-w-sm">The verified marketplace for vehicle service,
+                        anywhere,
+                        anytime.</p>
+                </div>
+                <div>
+                    <h4 class="text-xs uppercase tracking-[0.25em] text-primary-glow mb-4">Product</h4>
+                    <ul class="space-y-2.5 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">How it works</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">For mechanics</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs uppercase tracking-[0.25em] text-primary-glow mb-4">Company</h4>
+                    <ul class="space-y-2.5 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Press</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="flex flex-col md:flex-row justify-between items-start md:items-center pt-8 border-t border-hairline/40 text-xs text-muted-foreground">
+                <span>© 2026 Automobile Hub. Crafted for the open road.</span>
+                <span class="font-mono mt-2 md:mt-0">v1.0.0 · midnight build</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('header nav a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const targetEl = document.querySelector(targetId);
+                if (targetEl) {
+                    gsap.to(window, {
+                        scrollTo: { y: targetEl, offsetY: 90 },
+                        duration: 1.2,
+                        ease: "power3.inOut"
+                    });
+                }
+            });
+        });
+
+        // 1. Nav Entrance
+        gsap.from("header nav", {
+            y: -100,
+            opacity: 0,
+            duration: 1.2,
+            ease: "power4.out"
+        });
+
+        // 2. Hero Section (Enhanced)
+        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
+        heroTl
+            .from(".hero-badge", { y: 20, opacity: 0, duration: 0.8, delay: 0.5 })
+            .from(".hero-line", { y: 100, opacity: 0, duration: 1.2, stagger: 0.2 }, "-=0.6")
+            .from(".hero-sub", { y: 30, opacity: 0, duration: 1 }, "-=0.8")
+            .from(".hero-cta", { scale: 0.8, opacity: 0, duration: 0.8, stagger: 0.2 }, "-=0.6")
+            .from(".hero-meta span", { opacity: 0, x: -10, stagger: 0.1, duration: 0.8 }, "-=0.4")
+            .from(".hero-image", { clipPath: "inset(100% 0% 0% 0%)", opacity: 0, duration: 1.5, ease: "power2.inOut" }, "-=1");
+
+        // Floating Hero Elements
+        gsap.to(".hero-image", { y: -20, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        gsap.to(".ring-orbit", { rotation: 360, duration: 50, repeat: -1, ease: "none" });
+
+        // 3. Stats Section - Number Count Up
+        const stats = document.querySelectorAll('.stat-item');
+        stats.forEach(stat => {
+            const valObj = { val: 0 };
+            const targetEl = stat.querySelector('.text-gradient');
+            const originalText = targetEl.innerText;
+            const targetNum = parseFloat(originalText.replace(/[^0-9.]/g, ''));
+            const suffix = originalText.replace(/[0-9.]/g, '');
+
+            gsap.from(stat, {
+                opacity: 0,
+                y: 30,
+                scrollTrigger: {
+                    trigger: stat,
+                    start: "top 90%",
+                    onEnter: () => {
+                        gsap.to(valObj, {
+                            val: targetNum,
+                            duration: 2.5,
+                            ease: "power2.out",
+                            onUpdate: () => {
+                                targetEl.innerText = valObj.val.toFixed(originalText.includes('.') ? 1 : 0) + suffix;
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        // 4. Features Section - Individual Card Reveal on Scroll
+        document.querySelectorAll(".feat-card").forEach((card, i) => {
+            gsap.from(card, {
+                scale: 0.8,
+                opacity: 0,
+                duration: 1,
+                ease: "back.out(1.7)",
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // 5. Services Section - Individual Card Reveal on Scroll
+        document.querySelectorAll(".svc-card").forEach((card, i) => {
+            gsap.from(card, {
+                rotationX: -45,
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // 6. How It Works - Step by Step Draw
+        const steps = document.querySelectorAll('.step-row');
+        steps.forEach((step, i) => {
+            gsap.from(step, {
+                x: -50,
+                opacity: 0,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: step,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // 7. For Mechanics - Slide and List Stagger
+        gsap.from("#mechanics h2, #mechanics p, #mechanics button", {
+            x: -100,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.2,
+            scrollTrigger: {
+                trigger: "#mechanics",
+                start: "top 70%"
+            }
+        });
+
+        gsap.from("#mechanics li", {
+            x: 100,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: "#mechanics ul",
+                start: "top 80%"
+            }
+        });
+
+        // 8. Contact Section - Dual Side Slide
+        gsap.from("#contact .lg\\:col-span-3", {
+            x: -100,
+            opacity: 0,
+            duration: 1.5,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: "#contact",
+                start: "top 70%"
+            }
+        });
+
+        gsap.from("#contact form", {
+            x: 100,
+            opacity: 0,
+            duration: 1.5,
+            ease: "power4.out",
+            scrollTrigger: {
+                trigger: "#contact",
+                start: "top 70%"
+            }
+        });
+
+        // 3D Tilt Effect for Hero Image
+        const heroImage = document.querySelector('.hero-image');
+        heroImage.addEventListener('mousemove', (e) => {
+            const { left, top, width, height } = heroImage.getBoundingClientRect();
+            const x = (e.clientX - left) / width - 0.5;
+            const y = (e.clientY - top) / height - 0.5;
+
+            gsap.to(heroImage, {
+                rotationY: x * 15,
+                rotationX: -y * 15,
+                transformPerspective: 1000,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+        });
+
+        heroImage.addEventListener('mouseleave', () => {
+            gsap.to(heroImage, {
+                rotationY: 0,
+                rotationX: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.5)"
+            });
+        });
+
+        // Animated Scanline
+        gsap.to(".scan-sweep", {
+            y: "400%",
+            duration: 3,
+            repeat: -1,
+            ease: "none"
+        });
+
+        // Footer Fade
+        gsap.from("footer .grid > div", {
+            y: 20,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: "footer",
+                start: "top 90%"
+            }
+        });
+
+        // Card Interactive Hovers (Advanced)
+        const allCards = document.querySelectorAll('.svc-card, .feat-card');
+        allCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                gsap.to(card, {
+                    y: -15,
+                    scale: 1.03,
+                    backgroundColor: "hsla(var(--surface-elevated), 0.8)",
+                    duration: 0.4,
+                    ease: "power2.out",
+                    boxShadow: "var(--shadow-glow)"
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    y: 0,
+                    scale: 1,
+                    backgroundColor: "hsla(var(--surface), 0.6)",
+                    duration: 0.4,
+                    ease: "power2.inOut",
+                    boxShadow: "none"
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

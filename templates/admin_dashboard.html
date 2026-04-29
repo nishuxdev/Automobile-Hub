@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script>
+        // Auth Guard: Redirect to login if no token is found
+        if (!localStorage.getItem('access_token')) {
+            window.location.replace('/login/');
+        }
+        // Handle browser back-forward cache (bfcache)
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted && !localStorage.getItem('access_token')) {
+                window.location.replace('/login/');
+            }
+        });
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo d-flex align-items-center gap-2">
+            <img src="/static/images/logo_motorcycle.png" alt="Logo" style="width: 42px; height: 32px; filter: drop-shadow(0 0 6px hsl(252,95%,82%)); object-fit: contain;">
+            <span>AutoMobile</span>
+        </div>
+        <nav>
+            <div class="nav-section-title mb-2 mt-2 text-dim small fw-bold px-3">MAIN</div>
+            <a href="#" class="nav-link active" id="link-dashboard">
+                <span>Dashboard</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">MARKETPLACE</div>
+            <a href="#" class="nav-link" id="link-mechanics">
+                <span>Mechanics</span>
+            </a>
+            <a href="#" class="nav-link" id="link-verifications">
+                <span>Verifications</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">OPERATIONS</div>
+            <a href="#" class="nav-link" id="link-bookings">
+                <span>Bookings</span>
+            </a>
+            <a href="#" class="nav-link" id="link-disputes">
+                <span>Disputes</span>
+            </a>
+            <a href="#" class="nav-link" id="link-payments">
+                <span>Payments</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">PLATFORM</div>
+            <a href="#" class="nav-link" id="link-users">
+                <span>Users</span>
+            </a>
+            <a href="#" class="nav-link" id="link-settings">
+                <span>Config</span>
+            </a>
+        </nav>
+        <a href="#" id="logout-btn" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="section-dashboard" class="dashboard-section">
+            <div class="page-header">
+                <h1>Admin Dashboard</h1>
+                <p class="text-dim">Overview of your platform activity</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="total-users">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Customers</div>
+                    <div class="stat-value" id="total-customers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Mechanics</div>
+                    <div class="stat-value" id="total-mechanics">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Active</div>
+                    <div class="stat-value" id="pending-active">0</div>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h3 class="mb-4">Recent Users</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-user-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="section-users" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>User Management</h1>
+                <p class="text-dim">Manage all platform customers and admins</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-user-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="text-dim small" id="users-pagination-info">Showing page 1</div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item"><button class="btn-action prev-page" data-section="users"
+                                    disabled>Previous</button></li>
+                            <li class="page-item ms-2"><button class="btn-action next-page"
+                                    data-section="users">Next</button></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mechanics Section -->
+        <div id="section-mechanics" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Mechanic Management</h1>
+                <p class="text-dim">Approve and monitor service providers</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Mechanic</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mechanic-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="text-dim small" id="mechanics-pagination-info">Showing page 1</div>
+                    <nav>
+                        <ul class="pagination mb-0">
+                            <li class="page-item"><button class="btn-action prev-page" data-section="mechanics"
+                                    disabled>Previous</button></li>
+                            <li class="page-item ms-2"><button class="btn-action next-page"
+                                    data-section="mechanics">Next</button></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- Verifications Section -->
+        <div id="section-verifications" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Mechanic Verifications</h1>
+                <p class="text-dim">Review pending mechanic applications</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Mechanic</th>
+                                <th>Location Details</th>
+                                <th>Docs</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="verifications-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Section -->
+        <div id="section-bookings" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Live Bookings</h1>
+                <p class="text-dim">Monitor ongoing operations and overrides</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer - Mechanic</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disputes Section -->
+        <div id="section-disputes" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Disputes</h1>
+                <p class="text-dim">Resolve user and mechanic conflicts</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Booking</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disputes-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Section -->
+        <div id="section-payments" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Payments</h1>
+                <p class="text-dim">Transaction monitor</p>
+            </div>
+            <div class="content-section">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Txn ID</th>
+                                <th>Booking</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="section-settings" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Settings</h1>
+                <p class="text-dim">Configure platform parameters</p>
+            </div>
+            <div class="content-section">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label class="form-label text-dim">Platform Fee Type</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="config-fee-type">
+                                <option value="PERCENTAGE">Percentage (%)</option>
+                                <option value="FLAT">Flat Fee ($)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-dim">Fee Value</label>
+                            <input type="number" step="0.01" class="form-control" id="config-fee-value"
+                                placeholder="e.g. 10.00">
+                        </div>
+                        <button class="btn btn-auth" style="width: auto; padding: 10px 24px;">Save
+                            Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/admin_dashboard.js"></script>
+</body>
+
+</html>
