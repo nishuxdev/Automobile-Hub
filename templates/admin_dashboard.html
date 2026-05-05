@@ -60,6 +60,11 @@
             <a href="#" class="nav-link" id="link-settings">
                 <span>Config</span>
             </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">CONTENT</div>
+            <a href="#" class="nav-link" id="link-lectures">
+                <span>📹 Lectures</span>
+            </a>
         </nav>
         <a href="#" id="logout-btn" class="logout-btn">Logout</a>
     </div>
@@ -310,6 +315,72 @@
                         <button class="btn btn-auth" style="width: auto; padding: 10px 24px;">Save
                             Configuration</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lectures Section -->
+        <div id="section-lectures" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Video Lectures</h1>
+                <p class="text-dim">Upload and manage training videos for mechanics</p>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="content-section mb-4">
+                <h3 class="mb-4">📤 Upload New Lecture</h3>
+                <form id="lecture-upload-form" enctype="multipart/form-data">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-dim">Lecture Title</label>
+                                <input type="text" id="lecture-title" class="form-control bg-dark text-white border-secondary" placeholder="e.g., Engine Basics 101" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-dim">Description (optional)</label>
+                                <textarea id="lecture-description" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Briefly describe what this lecture covers..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-dim">Video File</label>
+                            <div id="video-drop-zone" style="border: 2px dashed rgba(99,102,241,0.4); border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(99,102,241,0.04); min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 40px; margin-bottom: 8px;">🎬</div>
+                                <div class="fw-semibold mb-1" id="drop-zone-text">Drag & drop video here or click to browse</div>
+                                <div class="text-dim small">Supports MP4, WebM, MOV (max 500MB)</div>
+                                <input type="file" id="lecture-video" accept="video/*" style="display: none;" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex align-items-center gap-3">
+                        <button type="submit" class="btn-action px-4 py-2" id="upload-btn" style="background: var(--accent); border-color: var(--accent);">Upload Lecture</button>
+                        <div id="upload-progress" style="display: none;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+                                <span class="text-dim small" id="upload-progress-text">Uploading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lectures List -->
+            <div class="content-section">
+                <h3 class="mb-4">📚 Uploaded Lectures</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Lecture</th>
+                                <th>Uploaded By</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lectures-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

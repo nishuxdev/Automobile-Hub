@@ -111,6 +111,11 @@
             <a href="#" class="nav-link" id="link-profile">
                 <span>My Profile</span>
             </a>
+
+            <div class="nav-section-title px-3 mt-4">LEARNING</div>
+            <a href="#" class="nav-link" id="link-lectures">
+                <span>🎓 Lectures</span>
+            </a>
         </nav>
         <a href="#" id="logout-btn" class="logout-btn">Logout</a>
     </div>
@@ -302,6 +307,22 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Lectures Section -->
+        <div id="section-lectures" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>🎓 Video Lectures</h1>
+                <p class="text-dim">Watch training videos to improve your skills and knowledge</p>
+            </div>
+            <div id="lectures-grid" class="row g-4">
+                <!-- Populated by JS -->
+            </div>
+            <div id="lectures-empty" class="content-section text-center py-5" style="display: none;">
+                <div style="font-size: 64px; opacity: 0.3; margin-bottom: 16px;">🎥</div>
+                <div class="fw-semibold mb-2">No Lectures Available</div>
+                <div class="text-dim small">Training videos will appear here once uploaded by the admin.</div>
             </div>
         </div>
     </div>

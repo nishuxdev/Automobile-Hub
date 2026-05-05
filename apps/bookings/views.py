@@ -68,6 +68,7 @@ class MechanicJobUpdateStatusView(generics.UpdateAPIView):
         valid_transitions = {
             'ASSIGNED': ['ACCEPTED', 'REJECTED'],
             'ACCEPTED': ['ON_THE_WAY', 'CANCELLED'],
+            'PAID': ['ON_THE_WAY'],
             'ON_THE_WAY': ['IN_PROGRESS'],
             'IN_PROGRESS': ['COMPLETED'],
         }

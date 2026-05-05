@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Customer Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - AutoMobile Hub</title>
+    <meta name="description" content="Book motorcycle repair services, discover nearby mechanics, and track your service bookings.">
     <script>
         if (!localStorage.getItem('access_token')) {
             window.location.replace('/login/');
@@ -15,21 +17,340 @@
         });
     </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
-<body class="bg-light">
-    <div class="container mt-5">
-        <div class="d-flex align-items-center gap-3 mb-4">
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo d-flex align-items-center gap-2">
             <img src="/static/images/logo_final.png" alt="Logo"
-                style="width: 56px; height: 56px; filter: drop-shadow(0 0 10px rgba(124,108,242,0.7)); object-fit: contain;">
-            <h1 class="mb-0">AutoMobile Hub</h1>
+                style="width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(124,108,242,0.7)); object-fit: contain;">
+            <span>AutoMobile</span>
         </div>
-        <h2>Welcome, Customer!</h2>
-        <p>This is your dashboard.</p>
-        <button id="logout-btn" class="btn btn-danger mt-3">Logout</button>
+        <nav>
+            <div class="nav-section-title mb-2 mt-2 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">MAIN</div>
+            <a href="#" class="nav-link active" id="link-dashboard">
+                <span>🏠 Dashboard</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">SERVICES</div>
+            <a href="#" class="nav-link" id="link-book">
+                <span>🔧 Book a Service</span>
+            </a>
+            <a href="#" class="nav-link" id="link-bookings">
+                <span>📋 My Bookings</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">FEEDBACK</div>
+            <a href="#" class="nav-link" id="link-ratings">
+                <span>⭐ Rate & Review</span>
+            </a>
+
+            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">ACCOUNT</div>
+            <a href="#" class="nav-link" id="link-profile">
+                <span>👤 My Profile</span>
+            </a>
+        </nav>
+        <a href="#" id="logout-btn" class="logout-btn">Logout</a>
     </div>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="/static/js/api.js"></script>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- ═══════════════ DASHBOARD SECTION ═══════════════ -->
+        <div id="section-dashboard" class="dashboard-section">
+            <div class="page-header">
+                <h1>Welcome back!</h1>
+                <p class="text-dim" id="dashboard-greeting">Your motorcycle service hub</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Bookings</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="stat-active" style="color: #818cf8;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value" id="stat-completed" style="color: #22c55e;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cancelled</div>
+                    <div class="stat-value" id="stat-cancelled" style="color: #f87171;">0</div>
+                </div>
+            </div>
+
+            <!-- Active Booking Quick View -->
+            <div class="content-section" id="active-booking-area">
+                <h3 class="mb-4">Active Booking</h3>
+                <div id="active-booking-content">
+                    <div class="empty-state-container">
+                        <div class="empty-icon">🏍️</div>
+                        <div class="empty-title">No active bookings</div>
+                        <div class="empty-desc">Book a motorcycle service to get started!</div>
+                        <button class="btn-primary-glow" onclick="switchToSection('section-book')">Book a Service</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ BOOK A SERVICE SECTION ═══════════════ -->
+        <div id="section-book" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Book a Service</h1>
+                <p class="text-dim">Find a nearby mechanic and get your motorcycle serviced</p>
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="step-indicator" id="booking-steps">
+                <div class="step"><div class="step-circle active" id="step-1">1</div></div>
+                <div class="step-line" id="line-1-2"></div>
+                <div class="step"><div class="step-circle" id="step-2">2</div></div>
+                <div class="step-line" id="line-2-3"></div>
+                <div class="step"><div class="step-circle" id="step-3">3</div></div>
+                <div class="step-line" id="line-3-4"></div>
+                <div class="step"><div class="step-circle" id="step-4">4</div></div>
+            </div>
+
+            <!-- Step 1: Service Details -->
+            <div id="booking-step-1" class="content-section">
+                <h4 class="mb-4">Service Details</h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="stat-label mb-2">Service Type</label>
+                        <select id="book-service-type" class="form-input-dark">
+                            <option value="">Select a service...</option>
+                            <option value="Oil Change">Oil Change</option>
+                            <option value="Brake Repair">Brake Repair</option>
+                            <option value="Engine Tuning">Engine Tuning</option>
+                            <option value="Chain & Sprocket">Chain & Sprocket</option>
+                            <option value="Full Service">Full Service</option>
+                            <option value="Tyre Replacement">Tyre Replacement</option>
+                            <option value="Electrical Issue">Electrical Issue</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label mb-2">Bike Model</label>
+                        <input type="text" id="book-bike-model" class="form-input-dark" placeholder="e.g., Honda Activa 6G">
+                    </div>
+                    <div class="col-12">
+                        <label class="stat-label mb-2">Describe the issue</label>
+                        <textarea id="book-description" class="form-input-dark" rows="3" placeholder="Tell us what's wrong with your bike..."></textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn-primary-glow" onclick="goToStep(2)">Next: Set Location →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Location -->
+            <div id="booking-step-2" class="content-section" style="display: none;">
+                <h4 class="mb-4">Your Location</h4>
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label class="stat-label mb-2">Address</label>
+                        <input type="text" id="book-location" class="form-input-dark" placeholder="e.g., 123 MG Road, Bangalore">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="stat-label mb-2">Latitude</label>
+                        <input type="number" id="book-lat" class="form-input-dark" step="0.000001" placeholder="12.971599">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="stat-label mb-2">Longitude</label>
+                        <input type="number" id="book-lon" class="form-input-dark" step="0.000001" placeholder="77.594566">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn-outline-dim w-100" onclick="detectLocation()" id="detect-location-btn">
+                            📍 Detect My Location
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label mb-2">Search Radius (km)</label>
+                        <input type="number" id="book-radius" class="form-input-dark" value="25" min="1" max="100">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn-outline-dim" onclick="goToStep(1)">← Back</button>
+                    <button class="btn-primary-glow" onclick="createBookingAndSearch()">Next: Find Mechanics →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Select Mechanic -->
+            <div id="booking-step-3" class="content-section" style="display: none;">
+                <h4 class="mb-2">Nearby Mechanics</h4>
+                <p class="text-dim mb-4">Select a mechanic to view pricing and assign to your booking</p>
+                <div id="mechanics-list" class="mechanic-cards-grid">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn-outline-dim" onclick="goToStep(2)">← Back</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Confirm & Pay -->
+            <div id="booking-step-4" class="content-section" style="display: none;">
+                <h4 class="mb-4">Confirm & Pay</h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <div class="stat-label mb-1">Assigned Mechanic</div>
+                            <div class="fw-bold fs-5" id="confirm-mechanic-name">—</div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="stat-label mb-1">Service</div>
+                            <div id="confirm-service-details">—</div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="stat-label mb-1">Your Service OTP</div>
+                            <div class="fw-bold fs-3 text-accent" id="confirm-otp">—</div>
+                            <div class="text-dim small mt-1">Share this code with the mechanic when they arrive</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="price-breakdown" id="confirm-price-breakdown">
+                            <!-- Populated by JS -->
+                        </div>
+                        <button class="btn-primary-glow w-100 mt-4 py-3 fs-6" id="confirm-pay-btn" onclick="confirmPayment()">
+                            💳 Confirm & Pay
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-start mt-4">
+                    <button class="btn-outline-dim" onclick="goToStep(3)">← Back</button>
+                </div>
+            </div>
+
+            <!-- Step: Success -->
+            <div id="booking-step-success" class="content-section" style="display: none;">
+                <div class="text-center py-5">
+                    <div style="font-size: 80px; margin-bottom: 16px;">✅</div>
+                    <h2 class="mb-3">Booking Confirmed!</h2>
+                    <p class="text-dim mb-4">Your mechanic has been notified. They will be on their way soon.</p>
+                    <div class="row justify-content-center g-3">
+                        <div class="col-auto">
+                            <button class="btn-primary-glow" onclick="switchToSection('section-bookings')">View My Bookings</button>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn-outline-dim" onclick="resetBookingFlow()">Book Another Service</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ MY BOOKINGS SECTION ═══════════════ -->
+        <div id="section-bookings" class="dashboard-section" style="display: none;">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>My Bookings</h1>
+                    <p class="text-dim">Track and manage your service bookings</p>
+                </div>
+                <select id="bookings-filter" class="form-input-dark" style="width: auto;">
+                    <option value="">All Bookings</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="ASSIGNED">Assigned</option>
+                    <option value="PAID">Paid</option>
+                    <option value="ON_THE_WAY">On The Way</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+            </div>
+            <div id="bookings-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- ═══════════════ RATE & REVIEW SECTION ═══════════════ -->
+        <div id="section-ratings" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>Rate & Review</h1>
+                <p class="text-dim">Share your experience with completed services</p>
+            </div>
+
+            <div id="unrated-bookings-area" class="content-section mb-4">
+                <h4 class="mb-4">Pending Reviews</h4>
+                <div id="unrated-bookings-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ PROFILE SECTION ═══════════════ -->
+        <div id="section-profile" class="dashboard-section" style="display: none;">
+            <div class="page-header">
+                <h1>My Profile</h1>
+                <p class="text-dim">Your account details</p>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="content-section">
+                        <h4 class="mb-4">Account Information</h4>
+                        <div id="profile-info">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="content-section">
+                        <h4 class="mb-4">Booking Summary</h4>
+                        <div id="profile-stats">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ BOOKING DETAIL MODAL ═══════════════ -->
+    <div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg px-3">
+            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="booking-modal-title">Booking Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="booking-modal-content">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ RATING MODAL ═══════════════ -->
+    <div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered px-3">
+            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Rate Your Experience</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <input type="hidden" id="rating-booking-id">
+                    <p class="text-dim mb-4">How was your service experience?</p>
+                    <div class="star-rating mb-4" id="star-rating-input">
+                        <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                        <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+                    </div>
+                    <textarea id="rating-review" class="form-input-dark mb-4" rows="3" placeholder="Write a review (optional)..."></textarea>
+                    <button class="btn-primary-glow w-100 py-3" onclick="submitRating()">Submit Rating</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/customer_dashboard.js"></script>
 </body>
 
 </html>

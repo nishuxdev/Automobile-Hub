@@ -39,3 +39,21 @@ class Dispute(models.Model):
 
     def __str__(self):
         return f"Dispute on Booking #{self.booking.id} - {self.status}"
+
+
+class VideoLecture(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    video_file = models.FileField(upload_to='lectures/')
+    uploaded_by = models.ForeignKey(
+        'users.User', on_delete=models.SET_NULL, null=True, related_name='uploaded_lectures'
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
