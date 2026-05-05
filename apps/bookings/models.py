@@ -1,10 +1,13 @@
 from django.db import models
 from django.conf import settings
 
+
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('ASSIGNED', 'Assigned'),
+        ('PAYMENT_PENDING', 'Payment Pending'),
+        ('PAID', 'Paid'),
         ('ACCEPTED', 'Accepted'),
         ('ON_THE_WAY', 'On The Way'),
         ('IN_PROGRESS', 'In Progress'),
@@ -20,15 +23,19 @@ class Booking(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='mechanic_bookings'
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    
+
     service_details = models.TextField()
+    bike_model = models.CharField(max_length=100, blank=True, default='')
     location = models.CharField(max_length=255)
-    
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
     # Financials
-    price_breakdown = models.JSONField(default=dict, blank=True) # { "parts": 0, "labor": 0, "total_cost": 0 }
+    price_breakdown = models.JSONField(default=dict, blank=True)
     platform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    
+    price_locked = models.BooleanField(default=False)
+
     # Workflow Helpers
     service_otp = models.CharField(max_length=6, blank=True, null=True)
     before_photo = models.ImageField(upload_to='bookings/before/', blank=True, null=True)
@@ -43,3 +50,23 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking #{self.id} - {self.customer.email} - {self.status}"
+
+
+class Rating(models.Model):
+    """Post-service rating submitted by customer for a completed booking."""
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='rating')
+    mechanic = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_ratings'
+    )
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='given_ratings'
+    )
+    score = models.PositiveIntegerField()  # 1–5
+    review = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Rating {self.score}★ for Booking #{self.booking.id}"

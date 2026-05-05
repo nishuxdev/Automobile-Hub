@@ -33,6 +33,8 @@ $(document).ready(function() {
             fetchPayments();
         } else if (sectionId === 'section-settings') {
             fetchConfig();
+        } else if (sectionId === 'section-lectures') {
+            fetchLectures();
         }
     });
 
@@ -406,5 +408,166 @@ $(document).ready(function() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login/';
+    });
+
+    // ── Video Lectures ──────────────────────────────────────────────
+
+    function fetchLectures() {
+        $.ajax({
+            url: '/auth/admin/lectures/',
+            type: 'GET',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+            success: function(data) {
+                const tbody = $('#lectures-table-body');
+                tbody.empty();
+                const lectures = data.results || data;
+
+                if (!lectures || lectures.length === 0) {
+                    tbody.append('<tr><td colspan="5" class="text-center py-4 text-dim">No lectures uploaded yet</td></tr>');
+                    return;
+                }
+
+                lectures.forEach(l => {
+                    const statusBadge = l.is_active
+                        ? '<span class="role-badge" style="background: rgba(34,197,94,0.15); color: #22c55e;">Active</span>'
+                        : '<span class="role-badge" style="background: rgba(148,163,184,0.15); color: #94a3b8;">Inactive</span>';
+                    const row = `
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">🎬</div>
+                                    <div>
+                                        <div class="fw-semibold">${l.title}</div>
+                                        <div class="text-dim small text-truncate" style="max-width: 250px;">${l.description || 'No description'}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${l.uploaded_by_name || 'Admin'}</td>
+                            <td>${new Date(l.created_at).toLocaleDateString()}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="${l.video_url || l.video_file}" target="_blank" class="btn-action btn-sm text-info text-decoration-none">▶ Play</a>
+                                    <button class="btn-action btn-sm text-danger delete-lecture" data-id="${l.id}">🗑 Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+        });
+    }
+
+    // Drag-and-drop zone
+    const dropZone = document.getElementById('video-drop-zone');
+    const fileInput = document.getElementById('lecture-video');
+
+    if (dropZone && fileInput) {
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--accent)';
+            dropZone.style.background = 'rgba(99,102,241,0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = 'rgba(99,102,241,0.4)';
+            dropZone.style.background = 'rgba(99,102,241,0.04)';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'rgba(99,102,241,0.4)';
+            dropZone.style.background = 'rgba(99,102,241,0.04)';
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateDropZoneText(fileInput.files[0].name);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                updateDropZoneText(fileInput.files[0].name);
+            }
+        });
+    }
+
+    function updateDropZoneText(name) {
+        $('#drop-zone-text').html(`<span class="text-success">✓</span> ${name}`);
+    }
+
+    // Upload lecture
+    $('#lecture-upload-form').on('submit', function(e) {
+        e.preventDefault();
+        const title = $('#lecture-title').val().trim();
+        const description = $('#lecture-description').val().trim();
+        const videoFile = $('#lecture-video')[0].files[0];
+
+        if (!title || !videoFile) {
+            alert('Please provide a title and select a video file.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('video_file', videoFile);
+
+        $('#upload-btn').prop('disabled', true);
+        $('#upload-progress').show();
+
+        $.ajax({
+            url: '/auth/admin/lectures/',
+            type: 'POST',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhr: function() {
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(evt) {
+                    if (evt.lengthComputable) {
+                        const pct = Math.round((evt.loaded / evt.total) * 100);
+                        $('#upload-progress-text').text(`Uploading... ${pct}%`);
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function() {
+                $('#lecture-upload-form')[0].reset();
+                $('#drop-zone-text').text('Drag & drop video here or click to browse');
+                $('#upload-btn').prop('disabled', false);
+                $('#upload-progress').hide();
+                fetchLectures();
+            },
+            error: function(xhr) {
+                alert('Upload failed: ' + (xhr.responseJSON ? JSON.stringify(xhr.responseJSON) : 'Server error'));
+                $('#upload-btn').prop('disabled', false);
+                $('#upload-progress').hide();
+            }
+        });
+    });
+
+    // Delete lecture
+    $(document).on('click', '.delete-lecture', function() {
+        if (!confirm('Are you sure you want to delete this lecture?')) return;
+        const id = $(this).data('id');
+        const btn = $(this);
+        btn.prop('disabled', true).text('...');
+
+        $.ajax({
+            url: `/auth/admin/lectures/${id}/`,
+            type: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+            success: function() {
+                fetchLectures();
+            },
+            error: function() {
+                alert('Failed to delete lecture.');
+                btn.prop('disabled', false).html('🗑 Delete');
+            }
+        });
     });
 });

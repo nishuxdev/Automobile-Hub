@@ -206,4 +206,401 @@ body {
 @media (max-width: 768px) {
     .sidebar { width: 0; padding: 0; display: none; }
     .main-content { margin-left: 0; padding: 20px; }
+    .mechanic-card { min-width: 100% !important; }
 }
+
+/* ────────── Customer Dashboard Specific Styles ────────── */
+
+/* Mechanic Discovery Cards */
+.mechanic-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.mechanic-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.mechanic-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #a855f7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mechanic-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+}
+
+.mechanic-card:hover::before {
+    opacity: 1;
+}
+
+.mechanic-card .mechanic-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.mechanic-card .mechanic-location {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+}
+
+.mechanic-card .mechanic-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.mechanic-card .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.mechanic-card .meta-item .meta-value {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.mechanic-card .service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.mechanic-card .service-tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(99, 102, 241, 0.12);
+    color: #a5b4fc;
+}
+
+.mechanic-card .select-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mechanic-card .select-btn:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Multi-step Progress */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 32px;
+}
+
+.step-indicator .step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step-indicator .step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.step-indicator .step-circle.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.step-indicator .step-circle.done {
+    background: #22c55e;
+    color: white;
+    border-color: #22c55e;
+}
+
+.step-indicator .step-line {
+    width: 48px;
+    height: 2px;
+    background: var(--border);
+    transition: background 0.3s ease;
+}
+
+.step-indicator .step-line.done {
+    background: #22c55e;
+}
+
+/* Star Rating */
+.star-rating {
+    display: flex;
+    gap: 8px;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 32px;
+    color: rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #fbbf24;
+    text-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+}
+
+/* Booking Status Timeline */
+.status-tracker {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 16px 0;
+    overflow-x: auto;
+}
+
+.status-tracker .track-step {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.status-tracker .track-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.status-tracker .track-dot.completed {
+    background: #22c55e;
+    border-color: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.status-tracker .track-dot.current {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    width: 18px;
+    height: 18px;
+}
+
+.status-tracker .track-line {
+    width: 32px;
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+}
+
+.status-tracker .track-line.completed {
+    background: #22c55e;
+}
+
+.status-tracker .track-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Price Breakdown */
+.price-breakdown {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.price-breakdown .price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.price-breakdown .price-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 18px;
+    padding-top: 14px;
+    color: #22c55e;
+}
+
+.price-breakdown .price-label {
+    color: var(--text-dim);
+}
+
+/* Empty State */
+.empty-state-container {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state-container .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-state-container .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-state-container .empty-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto 20px;
+}
+
+/* Booking Card */
+.booking-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    margin-bottom: 16px;
+}
+
+.booking-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.badge-PENDING { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+.badge-ASSIGNED { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.badge-PAYMENT_PENDING { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+.badge-PAID { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.badge-ACCEPTED { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+.badge-ON_THE_WAY { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+.badge-IN_PROGRESS { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
+.badge-COMPLETED { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.badge-CANCELLED { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.badge-REJECTED { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* Form inputs (customer) */
+.form-input-dark {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 100%;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-input-dark:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.form-input-dark::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-primary-glow {
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-glow:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+}
+
+.btn-outline-dim {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-dim:hover {
+    border-color: var(--text-main);
+    color: var(--text-main);
+}
+
+.text-accent { color: var(--accent) !important; }

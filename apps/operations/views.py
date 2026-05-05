@@ -1,8 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from apps.users.views import IsAdmin
-from .models import Dispute, Payment
-from .serializers import DisputeSerializer, PaymentSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from apps.users.views import IsAdmin, IsMechanic
+from .models import Dispute, Payment, VideoLecture
+from .serializers import DisputeSerializer, PaymentSerializer, VideoLectureSerializer
 
 class AdminDisputeListView(generics.ListAPIView):
     permission_classes = (IsAdmin,)
@@ -48,3 +49,36 @@ class AdminPaymentListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Payment.objects.all().order_by('-created_at')
+
+
+# ── Video Lecture Views ──────────────────────────────────────────────
+
+class AdminVideoLectureListCreateView(generics.ListCreateAPIView):
+    """Admin can list all lectures and upload new ones via multipart form."""
+    permission_classes = (IsAdmin,)
+    serializer_class = VideoLectureSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        return VideoLecture.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
+
+
+class AdminVideoLectureDeleteView(generics.DestroyAPIView):
+    """Admin can delete a lecture."""
+    permission_classes = (IsAdmin,)
+    serializer_class = VideoLectureSerializer
+
+    def get_queryset(self):
+        return VideoLecture.objects.all()
+
+
+class MechanicVideoLectureListView(generics.ListAPIView):
+    """Mechanics can view all active lectures."""
+    permission_classes = (IsMechanic,)
+    serializer_class = VideoLectureSerializer
+
+    def get_queryset(self):
+        return VideoLecture.objects.filter(is_active=True)

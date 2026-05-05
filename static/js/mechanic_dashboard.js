@@ -398,4 +398,71 @@ $(document).ready(function() {
         localStorage.clear();
         window.location.href = '/login/';
     });
+
+    // ── Video Lectures ──────────────────────────────────────────────
+
+    function fetchLectures() {
+        $.ajax({
+            url: '/auth/mechanic/lectures/',
+            type: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token },
+            success: function(data) {
+                const grid = $('#lectures-grid');
+                grid.empty();
+                const lectures = data.results || data;
+
+                if (!lectures || lectures.length === 0) {
+                    grid.hide();
+                    $('#lectures-empty').show();
+                    return;
+                }
+
+                $('#lectures-empty').hide();
+                grid.show();
+
+                lectures.forEach(l => {
+                    const videoUrl = l.video_url || l.video_file;
+                    const card = `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="content-section p-0" style="overflow: hidden; border-radius: 20px;">
+                                <div style="position: relative; background: #000; border-radius: 20px 20px 0 0; overflow: hidden;">
+                                    <video
+                                        controls
+                                        preload="metadata"
+                                        style="width: 100%; height: 220px; object-fit: cover; display: block;"
+                                        poster=""
+                                    >
+                                        <source src="${videoUrl}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                                <div class="p-4">
+                                    <div class="fw-bold mb-1" style="font-size: 16px;">${l.title}</div>
+                                    <div class="text-dim small mb-3" style="min-height: 36px;">${l.description || 'No description provided'}</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-dim" style="font-size: 11px;">
+                                            📅 ${new Date(l.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                        </div>
+                                        <div class="text-dim" style="font-size: 11px;">
+                                            👤 ${l.uploaded_by_name || 'Admin'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    grid.append(card);
+                });
+            },
+            error: function() {
+                $('#lectures-grid').hide();
+                $('#lectures-empty').show();
+            }
+        });
+    }
+
+    // Load lectures when navigating to that section
+    $(document).on('click', '#link-lectures', function() {
+        fetchLectures();
+    });
 });

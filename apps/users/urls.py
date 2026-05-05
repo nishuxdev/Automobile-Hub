@@ -17,7 +17,15 @@ from apps.bookings.views import (
     AdminBookingListView, AdminBookingOverrideView,
     MechanicJobListView, MechanicJobDetailView, MechanicJobUpdateStatusView, MechanicEarningsView
 )
-from apps.operations.views import AdminDisputeListView, AdminDisputeActionView, AdminPaymentListView
+from apps.bookings.customer_views import (
+    NearbyMechanicListView, CustomerBookingCreateView, CustomerBookingListView,
+    CustomerBookingDetailView, CustomerSelectMechanicView, CustomerBookingCancelView,
+    CustomerConfirmPaymentView, CustomerRatingCreateView, CustomerStatsView,
+)
+from apps.operations.views import (
+    AdminDisputeListView, AdminDisputeActionView, AdminPaymentListView,
+    AdminVideoLectureListCreateView, AdminVideoLectureDeleteView, MechanicVideoLectureListView
+)
 from apps.core.views import AdminPlatformConfigView
 
 urlpatterns = [
@@ -37,6 +45,19 @@ urlpatterns = [
     path('mechanic/earnings/', MechanicEarningsView.as_view(), name='mechanic_earnings'),
     path('mechanic/services/', MechanicServiceListView.as_view(), name='mechanic_services'),
     path('mechanic/services/<int:pk>/', MechanicServiceDetailView.as_view(), name='mechanic_service_detail'),
+    path('mechanic/lectures/', MechanicVideoLectureListView.as_view(), name='mechanic_lectures'),
+
+    # Customer API
+    path('customer/nearby-mechanics/', NearbyMechanicListView.as_view(), name='nearby_mechanics'),
+    path('customer/bookings/', CustomerBookingListView.as_view(), name='customer_bookings'),
+    path('customer/bookings/create/', CustomerBookingCreateView.as_view(), name='customer_booking_create'),
+    path('customer/bookings/<int:pk>/', CustomerBookingDetailView.as_view(), name='customer_booking_detail'),
+    path('customer/bookings/<int:pk>/select-mechanic/', CustomerSelectMechanicView.as_view(), name='customer_select_mechanic'),
+    path('customer/bookings/<int:pk>/cancel/', CustomerBookingCancelView.as_view(), name='customer_booking_cancel'),
+    path('customer/bookings/<int:pk>/confirm-payment/', CustomerConfirmPaymentView.as_view(), name='customer_confirm_payment'),
+    path('customer/bookings/<int:pk>/rate/', CustomerRatingCreateView.as_view(), name='customer_rating'),
+    path('customer/stats/', CustomerStatsView.as_view(), name='customer_stats'),
+
     # Admin API - Users
     path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),
     path('admin/users/', AdminUserListView.as_view(), name='admin_users'),
@@ -58,4 +79,8 @@ urlpatterns = [
     
     # Admin API - Core
     path('admin/config/', AdminPlatformConfigView.as_view(), name='admin_config'),
+
+    # Admin API - Lectures
+    path('admin/lectures/', AdminVideoLectureListCreateView.as_view(), name='admin_lectures'),
+    path('admin/lectures/<int:pk>/', AdminVideoLectureDeleteView.as_view(), name='admin_lecture_delete'),
 ]
