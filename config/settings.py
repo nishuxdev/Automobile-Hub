@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.marketplace',
     'apps.bookings',
+    'apps.bikes',
     'apps.operations',
     'apps.core',
 ]

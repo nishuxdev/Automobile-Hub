@@ -71,6 +71,9 @@
             <a href="#" class="nav-link" id="link-bookings">
                 <span> My Bookings</span>
             </a>
+            <a href="#" class="nav-link" id="link-bikes">
+                <span> My Bikes</span>
+            </a>
 
             <div class="nav-section-title px-3 mt-4">FEEDBACK</div>
             <a href="#" class="nav-link" id="link-ratings">
@@ -174,7 +177,14 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="stat-label mb-2">Bike Model</label>
+                        <label class="stat-label mb-2">Select Bike</label>
+                        <select id="book-bike-select" class="form-input-dark">
+                            <option value="">Select a registered bike...</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="book-bike-model-group" style="display: none;">
+                        <label class="stat-label mb-2">Or Type Bike Model</label>
                         <input type="text" id="book-bike-model" class="form-input-dark"
                             placeholder="e.g., Honda Activa 6G">
                     </div>
@@ -312,6 +322,21 @@
             </div>
         </div>
 
+        <!-- ═══════════════ MY BIKES SECTION ═══════════════ -->
+        <div id="section-bikes" class="dashboard-section" style="display: none;">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>My Bikes</h1>
+                    <p class="text-dim">Manage motorcycles and view full service histories.</p>
+                </div>
+                <button class="btn-primary-glow" onclick="BikeManager.openModal()">+ Add Bike</button>
+            </div>
+            
+            <div id="bikes-list-container">
+                <!-- Cards Grid or Empty state rendered by customer_bikes.js -->
+            </div>
+        </div>
+
         <!-- ═══════════════ RATE & REVIEW SECTION ═══════════════ -->
         <div id="section-ratings" class="dashboard-section" style="display: none;">
             <div class="page-header">
@@ -399,9 +424,96 @@
         </div>
     </div>
 
+    <!-- ═══════════════ ADD/EDIT BIKE MODAL ═══════════════ -->
+    <div class="modal fade" id="bikeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="bike-modal-title">Register Bike</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="bike-form" enctype="multipart/form-data">
+                    <div class="modal-body px-4">
+                        <input type="hidden" id="bike-id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Brand *</label>
+                                <input type="text" class="form-input-dark" name="brand" id="bike-brand" placeholder="e.g. Honda" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Model *</label>
+                                <input type="text" class="form-input-dark" name="model" id="bike-model-name" placeholder="e.g. Activa 6G" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Nickname (Optional)</label>
+                                <input type="text" class="form-input-dark" name="nickname" id="bike-nickname" placeholder="e.g. Daily Commuter">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Registration #</label>
+                                <input type="text" class="form-input-dark" name="registration_no" id="bike-reg-no" placeholder="e.g. KA01XX1234">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-dim small mb-1">Year</label>
+                                <input type="number" class="form-input-dark" name="year" id="bike-year" placeholder="2023">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-dim small mb-1">Color</label>
+                                <input type="text" class="form-input-dark" name="color" id="bike-color" placeholder="Black / Red">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-dim small mb-1">Engine CC</label>
+                                <input type="number" class="form-input-dark" name="engine_cc" id="bike-cc" placeholder="125">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Fuel Type</label>
+                                <select class="form-input-dark" name="fuel_type" id="bike-fuel">
+                                    <option value="PETROL">Petrol</option>
+                                    <option value="ELECTRIC">Electric</option>
+                                    <option value="DIESEL">Diesel</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-dim small mb-1">Bike Image</label>
+                                <input type="file" class="form-control bg-dark text-white border-0 small" name="photo" id="bike-photo" accept="image/*" style="font-size:13px;">
+                                <div class="mt-2"><img id="bike-photo-preview" src="" style="max-height: 60px; border-radius: 8px; display:none;"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-dim small mb-1">Private Notes</label>
+                                <textarea class="form-input-dark" name="notes" id="bike-notes" rows="2" placeholder="Any custom specifications..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 d-flex justify-content-between px-4 pb-4">
+                        <button type="button" class="btn text-danger bg-danger bg-opacity-10 px-3" id="delete-bike-btn" onclick="BikeManager.deleteBike()" style="display:none;">Delete</button>
+                        <div class="ms-auto">
+                            <button type="button" class="btn btn-outline-dim me-2" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary-glow px-4" id="save-bike-btn">Save Bike</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ BIKE REPORT MODAL ═══════════════ -->
+    <div class="modal fade" id="bikeReportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(30px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main); max-height: 90vh;">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2"><span style="font-size:1.2rem;">📊</span> Bike Service Report</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="bike-report-content">
+                    <!-- Dynamically built report from static/js/customer_bikes.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/chat.js"></script>
+    <script src="/static/js/customer_bikes.js"></script>
     <script src="/static/js/customer_dashboard.js"></script>
     <script>
         // Logo Click Animation - Realistic Piston Pump Effect + Flash

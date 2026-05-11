@@ -7,6 +7,7 @@ from .views import (
     UserRegistrationView, CurrentUserView, VerifyOTPView, 
     ResendOTPView, AdminStatsView, AdminUserListView, AdminUserToggleActiveView
 )
+from .serializers import CustomTokenObtainPairSerializer
 
 from apps.marketplace.views import (
     MechanicOnboardingView, MechanicAvailabilityToggleView,
@@ -30,15 +31,26 @@ from apps.operations.views import (
     AdminVideoLectureListCreateView, AdminVideoLectureDeleteView, MechanicVideoLectureListView
 )
 from apps.core.views import AdminPlatformConfigView
+from apps.bikes.views import (
+    CustomerBikeListCreateView, CustomerBikeDetailView, 
+    CustomerBikeReportView, CustomerBikeSelectListView
+)
 
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('verify-otp/', VerifyOTPView.as_view(), name='verify_otp'),
     path('resend-otp/', ResendOTPView.as_view(), name='resend_otp'),
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/', TokenObtainPairView.as_view(serializer_class=CustomTokenObtainPairSerializer), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', CurrentUserView.as_view(), name='current_user'),
     path('mechanic/onboarding/', MechanicOnboardingView.as_view(), name='mechanic_onboarding_api'),
+
+    # Bike API
+    path('customer/bikes/', CustomerBikeListCreateView.as_view(), name='customer_bike_list'),
+    path('customer/bikes/select/', CustomerBikeSelectListView.as_view(), name='customer_bike_select'),
+    path('customer/bikes/<int:pk>/', CustomerBikeDetailView.as_view(), name='customer_bike_detail'),
+    path('customer/bikes/<int:pk>/report/', CustomerBikeReportView.as_view(), name='customer_bike_report'),
+
     
     # Mechanic API
     path('mechanic/jobs/', MechanicJobListView.as_view(), name='mechanic_jobs'),

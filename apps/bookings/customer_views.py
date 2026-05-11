@@ -84,7 +84,23 @@ class CustomerBookingCreateView(generics.CreateAPIView):
     serializer_class = CustomerBookingCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(customer=self.request.user, status='PENDING')
+        bike_id = serializer.validated_data.pop('bike_id', None)
+        bike = None
+
+        if bike_id:
+            from apps.bikes.models import Bike
+            try:
+                bike = Bike.objects.get(pk=bike_id, owner=self.request.user, is_active=True)
+            except Bike.DoesNotExist:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({'bike_id': 'Bike not found or does not belong to you.'})
+
+            # Auto-populate bike_model from the registered bike
+            bike_model = serializer.validated_data.get('bike_model', '')
+            if not bike_model:
+                serializer.validated_data['bike_model'] = f"{bike.brand} {bike.model}"
+
+        serializer.save(customer=self.request.user, status='PENDING', bike=bike)
 
 
 class CustomerBookingListView(generics.ListAPIView):

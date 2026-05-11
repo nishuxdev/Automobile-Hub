@@ -22,6 +22,10 @@ class Booking(models.Model):
     mechanic = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='mechanic_bookings'
     )
+    bike = models.ForeignKey(
+        'bikes.Bike', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings',
+        help_text='Registered bike for this service (optional)',
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
 
     service_details = models.TextField()

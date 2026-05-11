@@ -140,7 +140,20 @@ $(document).ready(function() {
                 });
             },
             error: function(xhr) {
-                $('#login-message').html('<div class="text-danger">Login failed. Check credentials.</div>');
+                let msg = 'Login failed. Check credentials.';
+                if (xhr.responseJSON) {
+                    // Check for mechanic approval errors (nested under 'detail')
+                    if (xhr.responseJSON.detail) {
+                        if (Array.isArray(xhr.responseJSON.detail)) {
+                            msg = xhr.responseJSON.detail.join(' ');
+                        } else {
+                            msg = xhr.responseJSON.detail;
+                        }
+                    } else if (xhr.responseJSON.non_field_errors) {
+                        msg = xhr.responseJSON.non_field_errors.join(' ');
+                    }
+                }
+                $('#login-message').html('<div class="text-danger">' + msg + '</div>');
             }
         });
     });

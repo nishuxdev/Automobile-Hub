@@ -33,6 +33,7 @@ $(document).ready(function () {
         else if (sectionId === 'section-bookings') { fetchBookings(); }
         else if (sectionId === 'section-ratings') { fetchUnratedBookings(); }
         else if (sectionId === 'section-profile') { loadProfile(); }
+        else if (sectionId === 'section-bikes') { if (typeof BikeManager !== 'undefined') BikeManager.fetchBikes(); }
     };
 
     // ─────────────── Stats ───────────────
@@ -140,9 +141,34 @@ $(document).ready(function () {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function (pos) {
-                    $('#book-lat').val(pos.coords.latitude.toFixed(6));
-                    $('#book-lon').val(pos.coords.longitude.toFixed(6));
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    $('#book-lat').val(lat.toFixed(6));
+                    $('#book-lon').val(lon.toFixed(6));
                     btn.text('✅ Location Detected').prop('disabled', false);
+
+                    // Auto-fill address using Nominatim reverse geocoding
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`, {
+                        headers: { 'Accept-Language': 'en' }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                $('#book-location').val(data.display_name);
+                                console.log("Address auto-filled:", data.display_name);
+                            } else {
+                                console.warn("No display_name in reverse geocoding response:", data);
+                                if (!$('#book-location').val()) {
+                                    $('#book-location').val(`Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`);
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Reverse geocoding failed:", err);
+                            if (!$('#book-location').val()) {
+                                $('#book-location').val(`Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`);
+                            }
+                        });
                 },
                 function () {
                     alert('Location access denied. Please enter coordinates manually.');
@@ -166,6 +192,18 @@ $(document).ready(function () {
         const description = $('#book-description').val();
         const serviceDetails = `${serviceType}: ${description}`;
 
+        const bikeSelectVal = $('#book-bike-select').val();
+        const bikeModelRaw = $('#book-bike-model').val();
+        let bikeId = null;
+        let finalBikeModel = bikeModelRaw;
+
+        if (bikeSelectVal && bikeSelectVal !== 'other') {
+            bikeId = parseInt(bikeSelectVal);
+            // Final fallback is handled on backend if we don't provide bikeModel
+        } else if (!bikeModelRaw) {
+             return alert('Please select a bike or type a model manually.');
+        }
+
         // Create booking first
         $.ajax({
             url: '/auth/customer/bookings/create/', type: 'POST',
@@ -173,7 +211,8 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({
                 service_details: serviceDetails,
-                bike_model: $('#book-bike-model').val() || '',
+                bike_model: finalBikeModel || '',
+                bike_id: bikeId,
                 location: location,
                 latitude: parseFloat(lat),
                 longitude: parseFloat(lon)
@@ -280,6 +319,8 @@ $(document).ready(function () {
         currentBookingId = null;
         bookingStep = 1;
         $('#book-service-type').val('');
+        $('#book-bike-select').val('');
+        $('#book-bike-model-group').hide();
         $('#book-bike-model').val('');
         $('#book-description').val('');
         $('#book-location').val('');

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -29,3 +30,32 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Block unapproved mechanics from logging in."""
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        if self.user.role == 'mechanic':
+            from apps.marketplace.models import MechanicProfile
+            try:
+                profile = MechanicProfile.objects.get(user=self.user)
+                if profile.verification_status == 'PENDING':
+                    raise serializers.ValidationError(
+                        {'detail': 'Your account is pending admin approval. Please wait for verification.'},
+                        code='mechanic_pending',
+                    )
+                elif profile.verification_status == 'REJECTED':
+                    raise serializers.ValidationError(
+                        {'detail': 'Your mechanic application has been rejected. Please contact support.'},
+                        code='mechanic_rejected',
+                    )
+            except MechanicProfile.DoesNotExist:
+                raise serializers.ValidationError(
+                    {'detail': 'Mechanic profile not found. Please complete onboarding first.'},
+                    code='mechanic_no_profile',
+                )
+
+        return data

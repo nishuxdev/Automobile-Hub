@@ -7,6 +7,7 @@ class BookingSerializer(serializers.ModelSerializer):
     customer = UserSerializer(read_only=True)
     mechanic = UserSerializer(read_only=True)
     has_rating = serializers.SerializerMethodField()
+    bike_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Booking
@@ -15,6 +16,11 @@ class BookingSerializer(serializers.ModelSerializer):
 
     def get_has_rating(self, obj):
         return hasattr(obj, 'rating')
+
+    def get_bike_name(self, obj):
+        if obj.bike:
+            return obj.bike.display_name
+        return obj.bike_model or None
 
 class MechanicJobUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,9 +31,11 @@ class MechanicJobUpdateSerializer(serializers.ModelSerializer):
         }
 
 class CustomerBookingCreateSerializer(serializers.ModelSerializer):
+    bike_id = serializers.IntegerField(required=False, write_only=True, allow_null=True)
+
     class Meta:
         model = Booking
-        fields = ('id', 'service_details', 'bike_model', 'location', 'latitude', 'longitude')
+        fields = ('id', 'service_details', 'bike_model', 'location', 'latitude', 'longitude', 'bike_id')
         read_only_fields = ('id',)
 
 class RatingSerializer(serializers.ModelSerializer):
