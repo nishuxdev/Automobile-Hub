@@ -113,9 +113,9 @@
         <div class="container max-w-7xl mx-auto px-6">
             <nav
                 class="flex items-center justify-between rounded-2xl px-5 py-3 transition-all duration-500 ease-smooth glass-panel shadow-elegant">
-                <a href="#" class="flex items-center gap-2.5">
+                <a href="#" class="flex items-center gap-2.5" id="logo-link">
                     <img src="/static/images/logo_final.png" alt="AutoMobile Hub Logo"
-                        class="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(124,108,242,0.7)]">
+                        class="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(124,108,242,0.7)] transition-transform active:scale-90" id="main-logo">
                     <span class="font-display font-bold text-lg tracking-tight">Automobile Hub</span>
                 </a>
                 <div class="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -376,9 +376,9 @@
                             filter
                             replacement and tuning.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -397,9 +397,9 @@
                             clutch cable
                             adjustment.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -418,9 +418,9 @@
                             and indicator
                             diagnostics.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -439,9 +439,9 @@
                             manufacturer-grade
                             filters.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -460,9 +460,9 @@
                             and puncture
                             repair.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -481,9 +481,9 @@
                             chain
                             lubrication.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -502,9 +502,9 @@
                             and on-spot
                             fixes.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -523,9 +523,9 @@
                             dyno-grade
                             tuning.</p>
                         <div class="pt-3 border-t border-hairline/60 flex items-center justify-end">
-                            <span
+                            <a href="{% url 'login' %}"
                                 class="text-xs text-muted-foreground group-hover:text-primary-glow transition-colors">Book
-                                →</span>
+                                →</a>
                         </div>
                     </div>
                 </div>
@@ -809,21 +809,55 @@
         lucide.createIcons();
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-        // Smooth scroll for nav links
-        document.querySelectorAll('header nav a[href^="#"]').forEach(link => {
+        // Smooth scroll for nav links & Logo scroll to top
+        document.querySelectorAll('header nav a[href^="#"], footer a[href^="#"], #logo-link[href="#"]').forEach(link => {
             link.addEventListener('click', (e) => {
-                e.preventDefault();
                 const targetId = link.getAttribute('href');
-                const targetEl = document.querySelector(targetId);
-                if (targetEl) {
+                if (targetId === '#') {
+                    e.preventDefault();
                     gsap.to(window, {
-                        scrollTo: { y: targetEl, offsetY: 90 },
-                        duration: 1.2,
-                        ease: "power3.inOut"
+                        scrollTo: 0,
+                        duration: 1.5,
+                        ease: "power4.inOut"
                     });
+                } else if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetEl = document.querySelector(targetId);
+                    if (targetEl) {
+                        gsap.to(window, {
+                            scrollTo: { y: targetEl, offsetY: 90 },
+                            duration: 1.2,
+                            ease: "power3.inOut"
+                        });
+                    }
                 }
             });
         });
+
+        // Logo Click Animation - Realistic Piston Pump Effect + Flash
+        const logo = document.getElementById('main-logo');
+        if (logo) {
+            logo.addEventListener('click', (e) => {
+                const pumpTl = gsap.timeline();
+                
+                // Piston Pump + Flash Effect
+                pumpTl.to(logo, {
+                    x: 12,
+                    y: -12,
+                    filter: "brightness(2) drop-shadow(0 0 20px rgba(168,85,247,1))",
+                    duration: 0.06,
+                    repeat: 7,
+                    yoyo: true,
+                    ease: "none"
+                }).to(logo, {
+                    x: 0,
+                    y: 0,
+                    filter: "brightness(1) drop-shadow(0 0 10px rgba(124,108,242,0.7))",
+                    duration: 0.3,
+                    ease: "back.out(2)"
+                });
+            });
+        }
 
         // 1. Nav Entrance
         gsap.from("header nav", {
@@ -1012,6 +1046,29 @@
                 trigger: "footer",
                 start: "top 90%"
             }
+        });
+
+        // Footer Tags Stagger
+        gsap.from("footer h4, footer ul li", {
+            y: 10,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: "footer",
+                start: "top 85%"
+            }
+        });
+
+        // Nav Tags (Header) Stagger - Entrance on load
+        gsap.from("header nav .hidden.md\\:flex a", {
+            y: -20,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: "power3.out",
+            delay: 0.8
         });
 
         // Card Interactive Hovers (Advanced)

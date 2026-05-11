@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
+    <title>Admin Dashboard - AutoMobile Hub</title>
     <script>
         // Auth Guard: Redirect to login if no token is found
         if (!localStorage.getItem('access_token')) {
@@ -19,22 +19,48 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/dashboard.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        /* Theme Heading Colors */
+        .dashboard-section h1, 
+        .dashboard-section h2, 
+        .dashboard-section h3, 
+        .dashboard-section h4,
+        .page-header h1 {
+            color: var(--accent) !important;
+        }
+
+        /* Sidebar Section Titles - Theme Consistent */
+        .nav-section-title {
+            color: var(--accent) !important;
+            opacity: 0.9 !important;
+            font-weight: 700 !important;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .text-dim {
+            color: var(--text-dim) !important;
+        }
+    </style>
 </head>
 
 <body>
     <div class="sidebar">
         <div class="sidebar-logo d-flex align-items-center gap-2">
-            <img src="/static/images/logo_final.png" alt="Logo"
-                style="width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(124,108,242,0.7)); object-fit: contain;">
-            <span>AutoMobile</span>
+            <a href="{% url 'admin_dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none" id="logo-link">
+                <img src="/static/images/logo_final.png" alt="Logo" id="main-logo"
+                    style="width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(124,108,242,0.7)); object-fit: contain; transition: transform 0.2s ease;">
+                <span class="text-white">AutoMobile Hub</span>
+            </a>
         </div>
         <nav>
-            <div class="nav-section-title mb-2 mt-2 text-dim small fw-bold px-3">MAIN</div>
+            <div class="nav-section-title px-3 mt-4">MAIN</div>
             <a href="#" class="nav-link active" id="link-dashboard">
                 <span>Dashboard</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">MARKETPLACE</div>
+            <div class="nav-section-title px-3 mt-4">MARKETPLACE</div>
             <a href="#" class="nav-link" id="link-mechanics">
                 <span>Mechanics</span>
             </a>
@@ -42,7 +68,7 @@
                 <span>Verifications</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">OPERATIONS</div>
+            <div class="nav-section-title px-3 mt-4">OPERATIONS</div>
             <a href="#" class="nav-link" id="link-bookings">
                 <span>Bookings</span>
             </a>
@@ -53,7 +79,7 @@
                 <span>Payments</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">PLATFORM</div>
+            <div class="nav-section-title px-3 mt-4">PLATFORM</div>
             <a href="#" class="nav-link" id="link-users">
                 <span>Users</span>
             </a>
@@ -61,7 +87,7 @@
                 <span>Config</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3">CONTENT</div>
+            <div class="nav-section-title px-3 mt-4">CONTENT</div>
             <a href="#" class="nav-link" id="link-lectures">
                 <span>📹 Lectures</span>
             </a>
@@ -386,7 +412,32 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="/static/js/admin_dashboard.js"></script>
+    <script>
+        // Logo Click Animation - Realistic Piston Pump Effect + Flash
+        const logo = document.getElementById('main-logo');
+        if (logo) {
+            logo.addEventListener('click', (e) => {
+                const pumpTl = gsap.timeline();
+                pumpTl.to(logo, {
+                    x: 10,
+                    y: -10,
+                    filter: "brightness(2) drop-shadow(0 0 15px rgba(168,85,247,1))",
+                    duration: 0.06,
+                    repeat: 7,
+                    yoyo: true,
+                    ease: "none"
+                }).to(logo, {
+                    x: 0,
+                    y: 0,
+                    filter: "brightness(1) drop-shadow(0 0 8px rgba(124,108,242,0.7))",
+                    duration: 0.3,
+                    ease: "back.out(2)"
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
