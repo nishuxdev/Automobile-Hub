@@ -27,7 +27,8 @@ class MechanicJobUpdateSerializer(serializers.ModelSerializer):
 class CustomerBookingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ('service_details', 'bike_model', 'location', 'latitude', 'longitude')
+        fields = ('id', 'service_details', 'bike_model', 'location', 'latitude', 'longitude')
+        read_only_fields = ('id',)
 
 class RatingSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='customer.name', read_only=True)

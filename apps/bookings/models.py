@@ -70,3 +70,7 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"Rating {self.score}★ for Booking #{self.booking.id}"
+
+
+# Ensure ChatMessage is discovered by Django's migration system
+from .chat_models import ChatMessage  # noqa: E402, F401

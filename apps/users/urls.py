@@ -22,6 +22,9 @@ from apps.bookings.customer_views import (
     CustomerBookingDetailView, CustomerSelectMechanicView, CustomerBookingCancelView,
     CustomerConfirmPaymentView, CustomerRatingCreateView, CustomerStatsView,
 )
+from apps.bookings.chat_views import (
+    BookingChatListView, BookingChatSendView, BookingUnreadCountView,
+)
 from apps.operations.views import (
     AdminDisputeListView, AdminDisputeActionView, AdminPaymentListView,
     AdminVideoLectureListCreateView, AdminVideoLectureDeleteView, MechanicVideoLectureListView
@@ -57,6 +60,11 @@ urlpatterns = [
     path('customer/bookings/<int:pk>/confirm-payment/', CustomerConfirmPaymentView.as_view(), name='customer_confirm_payment'),
     path('customer/bookings/<int:pk>/rate/', CustomerRatingCreateView.as_view(), name='customer_rating'),
     path('customer/stats/', CustomerStatsView.as_view(), name='customer_stats'),
+
+    # Chat API (shared by customer + mechanic)
+    path('bookings/<int:pk>/chat/', BookingChatListView.as_view(), name='booking_chat'),
+    path('bookings/<int:pk>/chat/send/', BookingChatSendView.as_view(), name='booking_chat_send'),
+    path('bookings/<int:pk>/chat/unread/', BookingUnreadCountView.as_view(), name='booking_chat_unread'),
 
     # Admin API - Users
     path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),

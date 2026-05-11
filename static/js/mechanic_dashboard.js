@@ -1,5 +1,13 @@
 $(document).ready(function() {
     const token = localStorage.getItem('access_token');
+    let currentUserId = null;
+
+    // Fetch current user ID for chat
+    $.ajax({
+        url: '/auth/me/', type: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token },
+        success: function (u) { currentUserId = u.id; }
+    });
 
     // Initial loads
     fetchStats();
@@ -58,7 +66,7 @@ $(document).ready(function() {
         activeTbody.empty();
         historyTbody.empty();
 
-        const requests = jobs.filter(j => j.status === 'ASSIGNED');
+        const requests = jobs.filter(j => ['ASSIGNED', 'PAID'].includes(j.status));
         const active = jobs.filter(j => ['ACCEPTED', 'ON_THE_WAY', 'IN_PROGRESS'].includes(j.status));
         const history = jobs.filter(j => j.status === 'COMPLETED');
 
@@ -83,9 +91,10 @@ $(document).ready(function() {
                         <td><div class="text-truncate" style="max-width: 200px;">${req.location}</div></td>
                         <td class="text-success fw-bold">₹${req.total_amount}</td>
                         <td>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 flex-wrap">
                                 <button class="btn-action btn-sm" onclick="updateJobStatus(${req.id}, 'ACCEPTED')">Accept</button>
                                 <button class="btn-action btn-sm text-danger" onclick="updateJobStatus(${req.id}, 'REJECTED')">Reject</button>
+                                <button class="chat-fab" style="padding:6px 14px; font-size:12px;" onclick="ChatWidget.open(${req.id}, '${req.customer ? req.customer.name : 'Customer'}', ${currentUserId})">💬 Chat</button>
                             </div>
                         </td>
                     </tr>
@@ -105,7 +114,10 @@ $(document).ready(function() {
                         <td><span class="role-badge" style="background: var(--accent-glow); color: var(--accent);">${j.status.replace(/_/g, ' ')}</span></td>
                         <td><div class="text-truncate" style="max-width: 150px;">${j.location}</div></td>
                         <td>
-                            <button class="btn-action" onclick="openStatusModal(${j.id})">Update Status</button>
+                            <div class="d-flex gap-2">
+                                <button class="btn-action" onclick="openStatusModal(${j.id})">Update Status</button>
+                                <button class="chat-fab" style="padding:6px 14px; font-size:12px;" onclick="ChatWidget.open(${j.id}, '${j.customer ? j.customer.name : 'Customer'}', ${currentUserId})">💬 Chat</button>
+                            </div>
                         </td>
                     </tr>
                 `);
@@ -262,7 +274,7 @@ $(document).ready(function() {
             headers: { 'Authorization': 'Bearer ' + token },
             success: function(job) {
                 let actionContent = '';
-                if (job.status === 'ACCEPTED') {
+                if (job.status === 'PAID' || job.status === 'ACCEPTED') {
                     actionContent = `
                         <p class="text-dim">You have accepted this job. Ready to start the ride?</p>
                         <button class="btn-action w-100 py-3 mt-3 fw-bold fs-6" style="background: var(--accent);" onclick="updateJobStatus(${job.id}, 'ON_THE_WAY')">Start Ride to Customer</button>
@@ -302,6 +314,7 @@ $(document).ready(function() {
                         <a href="https://www.google.com/maps?q=${job.location}" target="_blank" class="btn-action btn-sm w-100 text-center text-decoration-none d-block">Open in Google Maps</a>
                     </div>
                     <hr class="opacity-10 my-4">
+                    <button class="chat-fab w-100 justify-content-center mb-3" onclick="ChatWidget.open(${job.id}, '${job.customer.name}', ${currentUserId})">💬 Chat with ${job.customer.name}</button>
                     ${actionContent}
                 `);
                 new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();

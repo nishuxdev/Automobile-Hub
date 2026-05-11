@@ -1,11 +1,20 @@
 $(document).ready(function () {
     const token = localStorage.getItem('access_token');
     let currentBookingId = null;
+    let currentUserId = null;
+    let currentMechanicName = null;
 
     // Initial loads
     fetchStats();
     fetchActiveBooking();
     loadProfile();
+
+    // Fetch current user ID for chat
+    $.ajax({
+        url: '/auth/me/', type: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token },
+        success: function (u) { currentUserId = u.id; }
+    });
 
     // ─────────────── Navigation ───────────────
     $('.nav-link').click(function (e) {
@@ -93,6 +102,7 @@ $(document).ready(function () {
                     <div class="col-6"><div class="stat-label">Amount</div><div class="fw-semibold text-success">₹${b.total_amount}</div></div>
                 </div>
                 ${b.service_otp ? `<div class="mt-3 p-3 rounded" style="background:rgba(99,102,241,0.1);"><div class="stat-label">Service OTP</div><div class="fw-bold fs-4 text-accent">${b.service_otp}</div></div>` : ''}
+                ${b.mechanic ? `<div class="mt-3"><button class="chat-fab" onclick="ChatWidget.open(${b.id}, '${b.mechanic.name}', ${currentUserId})">💬 Chat with Mechanic</button></div>` : ''}
             </div>
         `);
     }
@@ -225,6 +235,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({ mechanic_profile_id: profileId }),
             success: function (resp) {
+                currentMechanicName = resp.mechanic_name;
                 $('#confirm-mechanic-name').text(resp.mechanic_name);
                 $('#confirm-service-details').text($('#book-service-type').val() + ' — ' + ($('#book-bike-model').val() || 'N/A'));
                 $('#confirm-otp').text(resp.service_otp);
@@ -233,6 +244,9 @@ $(document).ready(function () {
                     <div class="price-row"><span class="price-label">Mechanic Cost</span><span>₹${pb.mechanic_cost}</span></div>
                     <div class="price-row"><span class="price-label">Platform Fee</span><span>₹${pb.platform_fee}</span></div>
                     <div class="price-row"><span>Total</span><span>₹${pb.total}</span></div>
+                    <div class="mt-3 pt-3" style="border-top: 1px solid var(--border);">
+                        <button class="chat-fab w-100 justify-content-center" onclick="ChatWidget.open(${currentBookingId}, '${resp.mechanic_name}', ${currentUserId})">💬 Chat with ${resp.mechanic_name}</button>
+                    </div>
                 `);
                 goToStep(4);
             },
@@ -315,9 +329,10 @@ $(document).ready(function () {
                                 <div class="col-4"><div class="stat-label">Amount</div><div class="small fw-bold">₹${b.total_amount}</div></div>
                                 <div class="col-4"><div class="stat-label">Date</div><div class="small">${new Date(b.created_at).toLocaleDateString()}</div></div>
                             </div>
-                            <div class="d-flex gap-2 mt-3">
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
                                 <button class="btn-action" onclick="openBookingDetail(${b.id})">View Details</button>
                                 ${actions.join('')}
+                                ${b.mechanic && !['COMPLETED','CANCELLED','REJECTED'].includes(b.status) ? `<button class="chat-fab" onclick="ChatWidget.open(${b.id}, '${b.mechanic.name}', ${currentUserId})">💬 Chat</button>` : ''}
                             </div>
                         </div>
                     `);
@@ -347,6 +362,7 @@ $(document).ready(function () {
                     </div>
                     ${pb.mechanic_cost ? `<div class="price-breakdown"><div class="price-row"><span class="price-label">Mechanic Cost</span><span>₹${pb.mechanic_cost}</span></div><div class="price-row"><span class="price-label">Platform Fee</span><span>₹${pb.platform_fee}</span></div><div class="price-row"><span>Total</span><span>₹${pb.total}</span></div></div>` : ''}
                     ${b.service_otp ? `<div class="mt-3 p-3 rounded" style="background:rgba(99,102,241,0.1);"><div class="stat-label">Service OTP</div><div class="fw-bold fs-4 text-accent">${b.service_otp}</div></div>` : ''}
+                    ${b.mechanic && !['COMPLETED','CANCELLED','REJECTED'].includes(b.status) ? `<div class="mt-4"><button class="chat-fab w-100 justify-content-center" onclick="ChatWidget.open(${b.id}, '${b.mechanic.name}', ${currentUserId})">💬 Chat with ${b.mechanic.name}</button></div>` : ''}
                 `);
                 new bootstrap.Modal(document.getElementById('bookingDetailModal')).show();
             }
