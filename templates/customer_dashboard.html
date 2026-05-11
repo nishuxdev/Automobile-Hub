@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Dashboard - AutoMobile Hub</title>
-    <meta name="description" content="Book motorcycle repair services, discover nearby mechanics, and track your service bookings.">
+    <meta name="description"
+        content="Book motorcycle repair services, discover nearby mechanics, and track your service bookings.">
     <script>
         if (!localStorage.getItem('access_token')) {
             window.location.replace('/login/');
@@ -19,38 +20,65 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/dashboard.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        /* Theme Heading Colors */
+        .dashboard-section h1,
+        .dashboard-section h2,
+        .dashboard-section h3,
+        .dashboard-section h4,
+        .page-header h1 {
+            color: var(--accent) !important;
+        }
+
+        /* Sidebar Section Titles - Theme Color */
+        .nav-section-title {
+            color: var(--accent) !important;
+            opacity: 0.9 !important;
+            font-weight: 700 !important;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .text-dim {
+            color: var(--text-dim) !important;
+        }
+    </style>
 </head>
 
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-logo d-flex align-items-center gap-2">
-            <img src="/static/images/logo_final.png" alt="Logo"
-                style="width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(124,108,242,0.7)); object-fit: contain;">
-            <span>AutoMobile</span>
+            <a href="{% url 'customer_dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none"
+                id="logo-link">
+                <img src="/static/images/logo_final.png" alt="Logo" id="main-logo"
+                    style="width: 40px; height: 40px; filter: drop-shadow(0 0 8px rgba(124,108,242,0.7)); object-fit: contain; transition: transform 0.2s ease;">
+                <span class="text-white">AutoMobile Hub</span>
+            </a>
         </div>
         <nav>
-            <div class="nav-section-title mb-2 mt-2 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">MAIN</div>
+            <div class="nav-section-title px-3 mt-4">MAIN</div>
             <a href="#" class="nav-link active" id="link-dashboard">
-                <span>🏠 Dashboard</span>
+                <span> Dashboard</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">SERVICES</div>
+            <div class="nav-section-title px-3 mt-4">SERVICES</div>
             <a href="#" class="nav-link" id="link-book">
-                <span>🔧 Book a Service</span>
+                <span> Book a Service</span>
             </a>
             <a href="#" class="nav-link" id="link-bookings">
-                <span>📋 My Bookings</span>
+                <span> My Bookings</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">FEEDBACK</div>
+            <div class="nav-section-title px-3 mt-4">FEEDBACK</div>
             <a href="#" class="nav-link" id="link-ratings">
-                <span>⭐ Rate & Review</span>
+                <span> Rate & Review</span>
             </a>
 
-            <div class="nav-section-title mb-2 mt-3 text-dim small fw-bold px-3" style="font-size:11px; letter-spacing:1.5px; opacity:0.5;">ACCOUNT</div>
+            <div class="nav-section-title px-3 mt-4">ACCOUNT</div>
             <a href="#" class="nav-link" id="link-profile">
-                <span>👤 My Profile</span>
+                <span> My Profile</span>
             </a>
         </nav>
         <a href="#" id="logout-btn" class="logout-btn">Logout</a>
@@ -93,7 +121,8 @@
                         <div class="empty-icon">🏍️</div>
                         <div class="empty-title">No active bookings</div>
                         <div class="empty-desc">Book a motorcycle service to get started!</div>
-                        <button class="btn-primary-glow" onclick="switchToSection('section-book')">Book a Service</button>
+                        <button class="btn-primary-glow" onclick="switchToSection('section-book')">Book a
+                            Service</button>
                     </div>
                 </div>
             </div>
@@ -108,13 +137,21 @@
 
             <!-- Step Indicator -->
             <div class="step-indicator" id="booking-steps">
-                <div class="step"><div class="step-circle active" id="step-1">1</div></div>
+                <div class="step">
+                    <div class="step-circle active" id="step-1">1</div>
+                </div>
                 <div class="step-line" id="line-1-2"></div>
-                <div class="step"><div class="step-circle" id="step-2">2</div></div>
+                <div class="step">
+                    <div class="step-circle" id="step-2">2</div>
+                </div>
                 <div class="step-line" id="line-2-3"></div>
-                <div class="step"><div class="step-circle" id="step-3">3</div></div>
+                <div class="step">
+                    <div class="step-circle" id="step-3">3</div>
+                </div>
                 <div class="step-line" id="line-3-4"></div>
-                <div class="step"><div class="step-circle" id="step-4">4</div></div>
+                <div class="step">
+                    <div class="step-circle" id="step-4">4</div>
+                </div>
             </div>
 
             <!-- Step 1: Service Details -->
@@ -137,11 +174,13 @@
                     </div>
                     <div class="col-md-6">
                         <label class="stat-label mb-2">Bike Model</label>
-                        <input type="text" id="book-bike-model" class="form-input-dark" placeholder="e.g., Honda Activa 6G">
+                        <input type="text" id="book-bike-model" class="form-input-dark"
+                            placeholder="e.g., Honda Activa 6G">
                     </div>
                     <div class="col-12">
                         <label class="stat-label mb-2">Describe the issue</label>
-                        <textarea id="book-description" class="form-input-dark" rows="3" placeholder="Tell us what's wrong with your bike..."></textarea>
+                        <textarea id="book-description" class="form-input-dark" rows="3"
+                            placeholder="Tell us what's wrong with your bike..."></textarea>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end mt-4">
@@ -155,15 +194,18 @@
                 <div class="row g-4">
                     <div class="col-12">
                         <label class="stat-label mb-2">Address</label>
-                        <input type="text" id="book-location" class="form-input-dark" placeholder="e.g., 123 MG Road, Bangalore">
+                        <input type="text" id="book-location" class="form-input-dark"
+                            placeholder="e.g., 123 MG Road, Bangalore">
                     </div>
                     <div class="col-md-4">
                         <label class="stat-label mb-2">Latitude</label>
-                        <input type="number" id="book-lat" class="form-input-dark" step="0.000001" placeholder="12.971599">
+                        <input type="number" id="book-lat" class="form-input-dark" step="0.000001"
+                            placeholder="12.971599">
                     </div>
                     <div class="col-md-4">
                         <label class="stat-label mb-2">Longitude</label>
-                        <input type="number" id="book-lon" class="form-input-dark" step="0.000001" placeholder="77.594566">
+                        <input type="number" id="book-lon" class="form-input-dark" step="0.000001"
+                            placeholder="77.594566">
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
                         <button class="btn-outline-dim w-100" onclick="detectLocation()" id="detect-location-btn">
@@ -216,7 +258,8 @@
                         <div class="price-breakdown" id="confirm-price-breakdown">
                             <!-- Populated by JS -->
                         </div>
-                        <button class="btn-primary-glow w-100 mt-4 py-3 fs-6" id="confirm-pay-btn" onclick="confirmPayment()">
+                        <button class="btn-primary-glow w-100 mt-4 py-3 fs-6" id="confirm-pay-btn"
+                            onclick="confirmPayment()">
                             💳 Confirm & Pay
                         </button>
                     </div>
@@ -234,7 +277,8 @@
                     <p class="text-dim mb-4">Your mechanic has been notified. They will be on their way soon.</p>
                     <div class="row justify-content-center g-3">
                         <div class="col-auto">
-                            <button class="btn-primary-glow" onclick="switchToSection('section-bookings')">View My Bookings</button>
+                            <button class="btn-primary-glow" onclick="switchToSection('section-bookings')">View My
+                                Bookings</button>
                         </div>
                         <div class="col-auto">
                             <button class="btn-outline-dim" onclick="resetBookingFlow()">Book Another Service</button>
@@ -312,10 +356,12 @@
     <!-- ═══════════════ BOOKING DETAIL MODAL ═══════════════ -->
     <div class="modal fade" id="bookingDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg px-3">
-            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
+            <div class="modal-content"
+                style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold" id="booking-modal-title">Booking Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4" id="booking-modal-content">
                     <!-- Rendered by JS -->
@@ -327,10 +373,12 @@
     <!-- ═══════════════ RATING MODAL ═══════════════ -->
     <div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered px-3">
-            <div class="modal-content" style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
+            <div class="modal-content"
+                style="background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; color: var(--text-main);">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold">Rate Your Experience</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4 text-center">
                     <input type="hidden" id="rating-booking-id">
@@ -342,15 +390,41 @@
                         <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
                         <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
                     </div>
-                    <textarea id="rating-review" class="form-input-dark mb-4" rows="3" placeholder="Write a review (optional)..."></textarea>
+                    <textarea id="rating-review" class="form-input-dark mb-4" rows="3"
+                        placeholder="Write a review (optional)..."></textarea>
                     <button class="btn-primary-glow w-100 py-3" onclick="submitRating()">Submit Rating</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/customer_dashboard.js"></script>
+    <script>
+        // Logo Click Animation - Realistic Piston Pump Effect + Flash
+        const logo = document.getElementById('main-logo');
+        if (logo) {
+            logo.addEventListener('click', (e) => {
+                const pumpTl = gsap.timeline();
+                pumpTl.to(logo, {
+                    x: 10,
+                    y: -10,
+                    filter: "brightness(2) drop-shadow(0 0 15px rgba(168,85,247,1))",
+                    duration: 0.06,
+                    repeat: 7,
+                    yoyo: true,
+                    ease: "none"
+                }).to(logo, {
+                    x: 0,
+                    y: 0,
+                    filter: "brightness(1) drop-shadow(0 0 8px rgba(124,108,242,0.7))",
+                    duration: 0.3,
+                    ease: "back.out(2)"
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
