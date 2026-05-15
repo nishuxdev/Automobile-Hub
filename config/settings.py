@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'apps.bikes',
     'apps.operations',
     'apps.core',
+    'apps.chatbot',
 ]
 
 MIDDLEWARE = [

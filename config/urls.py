@@ -31,6 +31,8 @@ urlpatterns = [
     path('mechanic/dashboard/', TemplateView.as_view(template_name='mechanic_dashboard.html'), name='mechanic_dashboard'),
     path('mechanic/onboarding/', TemplateView.as_view(template_name='mechanic_onboarding.html'), name='mechanic_onboarding'),
     path('dashboard/admin/', TemplateView.as_view(template_name='admin_dashboard.html'), name='admin_dashboard'),
+    path('chatbot/', TemplateView.as_view(template_name='chatbot.html'), name='chatbot'),
+    path('chatbot-api/', include('apps.chatbot.urls')),
 ]
 
 if settings.DEBUG:

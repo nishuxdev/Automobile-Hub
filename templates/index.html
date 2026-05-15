@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automobile Hub — Verified bike service, on demand</title>
+    <link rel="icon" type="image/png" href="/static/images/logo_final.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,6 +109,203 @@
 
 <body class="bg-background text-foreground antialiased relative min-h-screen overflow-x-hidden">
 
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- CHATBOT WIDGET & PANEL                              -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <style>
+        .chatbot-static-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999999;
+        }
+
+        .widget-btn-static {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 0 40px rgba(99, 102, 241, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .widget-btn-static:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5), 0 0 50px rgba(99, 102, 241, 0.2);
+        }
+
+        .widget-btn-static:active {
+            transform: scale(0.95);
+        }
+
+        .robot-face-svg {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .chat-panel-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            z-index: 999999;
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chat-panel-container.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel-container" id="chat-panel">
+        <div class="w-full h-full bg-[#0a0a1a]/95 backdrop-blur-md rounded-2xl border border-indigo-500/30 flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+            <!-- Header -->
+            <div class="p-4 border-b border-indigo-500/20 flex justify-between items-center bg-[#0d0d26]">
+                <div class="flex items-center gap-2.5">
+                    <!-- Bot Image (SVG) -->
+                    <svg class="robot-face-svg w-8 h-8" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="18" width="40" height="34" rx="8" fill="white" opacity="0.95"/>
+                        <line x1="32" y1="18" x2="32" y2="8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="32" cy="6" r="4" fill="#a855f7" stroke="white" stroke-width="1.5"/>
+                        <circle cx="24" cy="32" r="5" fill="#6366f1"/>
+                        <circle cx="40" cy="32" r="5" fill="#6366f1"/>
+                        <circle cx="26" cy="30" r="1.5" fill="white" opacity="0.8"/>
+                        <circle cx="42" cy="30" r="1.5" fill="white" opacity="0.8"/>
+                        <rect x="24" y="40" width="16" height="3" rx="1.5" fill="#6366f1" opacity="0.7"/>
+                        <rect x="6" y="28" width="6" height="12" rx="3" fill="white" opacity="0.7"/>
+                        <rect x="52" y="28" width="6" height="12" rx="3" fill="white" opacity="0.7"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-sans font-bold text-sm text-white">AutoBot</h3>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Online</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="toggleChatPanel()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Messages -->
+            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3" id="chat-messages">
+                <!-- Welcome Message -->
+                <div class="bg-[#1f1f3d] p-3 rounded-xl text-sm text-white max-w-[85%] self-start">
+                    Hello! I'm AutoBot 🤖. How can I help you today?
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-4 border-t border-indigo-500/20 bg-[#0d0d26]">
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-[#1a1a3a] border border-indigo-500/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-indigo-500/50 transition-colors" onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button onclick="sendMessage()" class="bg-gradient-to-br from-[#6366f1] to-[#a855f7] text-white rounded-xl px-4 text-sm font-semibold hover:opacity-90 transition-all duration-300">
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Button -->
+    <div class="chatbot-static-widget">
+        <button class="widget-btn-static" onclick="toggleChatPanel()" aria-label="Open Chatbot">
+            <svg class="robot-face-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Head -->
+                <rect x="12" y="18" width="40" height="34" rx="8" fill="white" opacity="0.95"/>
+                <!-- Antenna -->
+                <line x1="32" y1="18" x2="32" y2="8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="32" cy="6" r="4" fill="#a855f7" stroke="white" stroke-width="1.5"/>
+                <!-- Eyes -->
+                <circle cx="24" cy="32" r="5" fill="#6366f1"/>
+                <circle cx="40" cy="32" r="5" fill="#6366f1"/>
+                <!-- Eye shine -->
+                <circle cx="26" cy="30" r="1.5" fill="white" opacity="0.8"/>
+                <circle cx="42" cy="30" r="1.5" fill="white" opacity="0.8"/>
+                <!-- Mouth -->
+                <rect x="24" y="40" width="16" height="3" rx="1.5" fill="#6366f1" opacity="0.7"/>
+                <!-- Ears -->
+                <rect x="6" y="28" width="6" height="12" rx="3" fill="white" opacity="0.7"/>
+                <rect x="52" y="28" width="6" height="12" rx="3" fill="white" opacity="0.7"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        function toggleChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            panel.classList.toggle('open');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesContainer = document.getElementById('chat-messages');
+
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'bg-[#6366f1] p-3 rounded-xl text-sm text-white max-w-[85%] self-end';
+            userDiv.textContent = message;
+            messagesContainer.appendChild(userDiv);
+
+            // Clear input
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'bg-[#1f1f3d] p-3 rounded-xl text-sm text-white max-w-[85%] self-start';
+            typingDiv.innerHTML = '<span class="animate-pulse">...</span>';
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await fetch('/chatbot-api/api/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                // Remove typing indicator
+                messagesContainer.removeChild(typingDiv);
+
+                // Add bot response
+                const botDiv = document.createElement('div');
+                botDiv.className = 'bg-[#1f1f3d] p-3 rounded-xl text-sm text-white max-w-[85%] self-start';
+                botDiv.textContent = data.response || data.error || 'Sorry, I encountered an error.';
+                messagesContainer.appendChild(botDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            } catch (error) {
+                messagesContainer.removeChild(typingDiv);
+                const errDiv = document.createElement('div');
+                errDiv.className = 'bg-red-500/20 border border-red-500/50 p-3 rounded-xl text-sm text-white max-w-[85%] self-start';
+                errDiv.textContent = 'Failed to connect to the server.';
+                messagesContainer.appendChild(errDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+    </script>
+
     <!-- Nav -->
     <header class="fixed top-0 inset-x-0 z-50 transition-all duration-500 ease-smooth py-5">
         <div class="container max-w-7xl mx-auto px-6">
@@ -115,7 +313,8 @@
                 class="flex items-center justify-between rounded-2xl px-5 py-3 transition-all duration-500 ease-smooth glass-panel shadow-elegant">
                 <a href="#" class="flex items-center gap-2.5" id="logo-link">
                     <img src="/static/images/logo_final.png" alt="AutoMobile Hub Logo"
-                        class="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(124,108,242,0.7)] transition-transform active:scale-90" id="main-logo">
+                        class="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(124,108,242,0.7)] transition-transform active:scale-90"
+                        id="main-logo">
                     <span class="font-display font-bold text-lg tracking-tight">Automobile Hub</span>
                 </a>
                 <div class="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -839,7 +1038,7 @@
         if (logo) {
             logo.addEventListener('click', (e) => {
                 const pumpTl = gsap.timeline();
-                
+
                 // Piston Pump + Flash Effect
                 pumpTl.to(logo, {
                     x: 12,

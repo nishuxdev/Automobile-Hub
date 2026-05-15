@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoBot - AutoMobile Hub AI Assistant</title>
+    <link rel="icon" type="image/png" href="/static/images/logo_final.png">
+    <meta name="description" content="Chat with AutoBot, the intelligent AI assistant for AutoMobile Hub motorcycle services.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-deep: #0a0a1a;
+            --bg-surface: #111128;
+            --bg-card: #1a1a3e;
+            --bg-input: #14142e;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-light: #818cf8;
+            --text-main: #f0f0ff;
+            --text-dim: #8888aa;
+            --border: rgba(99, 102, 241, 0.15);
+            --border-active: rgba(99, 102, 241, 0.4);
+            --gradient-accent: linear-gradient(135deg, #6366f1, #a855f7, #6366f1);
+            --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .header-logo:active {
+            transform: scale(0.9);
+        }
+
+        .header-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-brand h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .header-brand .subtitle {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--accent-light);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: var(--border-active);
+            transform: translateX(-2px);
+        }
+
+        /* ── Messages Area ── */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 30%, rgba(99, 102, 241, 0.04), transparent 60%),
+                radial-gradient(ellipse 50% 60% at 80% 70%, rgba(168, 85, 247, 0.03), transparent 60%),
+                var(--bg-deep);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border-active);
+            border-radius: 3px;
+        }
+
+        /* ── Message Bubbles ── */
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .bot-avatar-img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            filter: brightness(1.3);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #374151, #1f2937);
+        }
+
+        .message-content {
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.65;
+            position: relative;
+        }
+
+        .message.bot .message-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 6px;
+            color: var(--text-main);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            border-bottom-right-radius: 6px;
+            color: white;
+        }
+
+        .message-content strong {
+            color: var(--accent-light);
+        }
+
+        .message.user .message-content strong {
+            color: #e0e7ff;
+        }
+
+        /* ── Typing Indicator ── */
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            padding: 16px 22px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-light);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.16s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.32s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ── Input Area ── */
+        .chat-input-area {
+            padding: 16px 24px;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 6px 6px 6px 18px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            padding: 10px 0;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--gradient-accent);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* ── Suggested Actions ── */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 24px 8px;
+            background: var(--bg-surface);
+        }
+
+        .suggestion-chip {
+            padding: 7px 14px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--accent-light);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--border-active);
+            transform: translateY(-1px);
+        }
+
+        /* ── Welcome Screen ── */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            gap: 20px;
+        }
+
+        .welcome-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px var(--accent-glow));
+        }
+
+        .welcome-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .welcome-subtitle {
+            color: var(--text-dim);
+            font-size: 14px;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .welcome-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .welcome-action-btn {
+            padding: 10px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .welcome-action-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--border-active);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .welcome-action-btn .icon {
+            font-size: 18px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .chat-header { padding: 12px 16px; }
+            .chat-messages { padding: 16px; }
+            .chat-input-area { padding: 12px 16px; }
+            .suggestions { padding: 0 16px 6px; }
+            .message { max-width: 92%; }
+            .back-btn span { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <img src="/static/images/logo_final.png" alt="AutoMobile Hub" class="header-logo" id="chat-logo">
+            <div class="header-brand">
+                <h1>AutoMobile Hub</h1>
+                <div class="subtitle">
+                    <span class="status-dot"></span>
+                    AutoBot AI Assistant
+                </div>
+            </div>
+        </div>
+        <a href="/" class="back-btn" id="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back</span>
+        </a>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chat-messages">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcome-screen">
+            <img src="/static/images/logo_final.png" alt="AutoBot" class="welcome-logo" id="welcome-logo-img">
+            <div class="welcome-title">Meet AutoBot</div>
+            <div class="welcome-subtitle">
+                Your AI-powered assistant for everything AutoMobile Hub.
+                Ask about services, bookings, pricing, or anything else!
+            </div>
+            <div class="welcome-actions">
+                <button class="welcome-action-btn" onclick="sendQuickMessage('What services do you offer?')">
+                    <span class="icon">🔧</span> Services
+                </button>
+                <button class="welcome-action-btn" onclick="sendQuickMessage('How do I book a service?')">
+                    <span class="icon">📋</span> Book Service
+                </button>
+                <button class="welcome-action-btn" onclick="sendQuickMessage('Tell me about pricing')">
+                    <span class="icon">💰</span> Pricing
+                </button>
+                <button class="welcome-action-btn" onclick="sendQuickMessage('How do I become a mechanic?')">
+                    <span class="icon">🛠️</span> Join as Mechanic
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" id="typing-indicator">
+        <div class="message-avatar" style="background: linear-gradient(135deg, var(--accent), #a855f7); box-shadow: 0 0 15px var(--accent-glow);">
+            <img src="/static/images/logo_final.png" alt="AutoBot" class="bot-avatar-img" id="typing-logo">
+        </div>
+        <div class="typing-dots">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="suggestions" id="suggestions">
+        <div class="suggestion-chip" onclick="sendQuickMessage('What services do you offer?')">🔧 Services</div>
+        <div class="suggestion-chip" onclick="sendQuickMessage('How do I book?')">📋 How to book</div>
+        <div class="suggestion-chip" onclick="sendQuickMessage('Tell me about pricing')">💰 Pricing</div>
+        <div class="suggestion-chip" onclick="sendQuickMessage('Track my booking')">📍 Track booking</div>
+        <div class="suggestion-chip" onclick="sendQuickMessage('Contact support')">📞 Support</div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+        <div class="input-wrapper">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask AutoBot anything..."
+                autocomplete="off" maxlength="500">
+            <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatLogo = document.getElementById('chat-logo');
+        const typingLogo = document.getElementById('typing-logo');
+
+        let isFirstMessage = true;
+
+        // ── Send Message ──
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Hide welcome screen on first message
+            if (isFirstMessage) {
+                gsap.to(welcomeScreen, {
+                    opacity: 0,
+                    scale: 0.95,
+                    duration: 0.3,
+                    onComplete: () => { welcomeScreen.style.display = 'none'; }
+                });
+                isFirstMessage = false;
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+            chatInput.value = '';
+            sendBtn.disabled = true;
+
+            // Show typing indicator with logo animation
+            showTyping();
+
+            try {
+                const response = await fetch('/chatbot-api/api/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                hideTyping();
+                addMessage(data.reply || data.error || 'Something went wrong.', 'bot');
+            } catch (err) {
+                hideTyping();
+                addMessage("Oops! Couldn't reach the server. Please try again. 🔧", 'bot');
+            }
+
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+
+        function sendQuickMessage(msg) {
+            chatInput.value = msg;
+            sendMessage();
+        }
+
+        // ── Add Message Bubble ──
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+
+            const avatarContent = sender === 'bot'
+                ? `<img src="/static/images/logo_final.png" alt="AutoBot" class="bot-avatar-img">`
+                : '👤';
+
+            // Format bot text (basic markdown-like)
+            let formattedText = text;
+            if (sender === 'bot') {
+                formattedText = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            div.innerHTML = `
+                <div class="message-avatar">${avatarContent}</div>
+                <div class="message-content">${formattedText}</div>
+            `;
+
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Animate entry
+            gsap.from(div, {
+                y: 20,
+                opacity: 0,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+
+            // Trigger logo animation on bot reply
+            if (sender === 'bot') {
+                triggerLogoAnimation();
+            }
+        }
+
+        // ── Typing Indicator ──
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Animate typing logo
+            if (typingLogo) {
+                gsap.to(typingLogo, {
+                    y: -4,
+                    duration: 0.3,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power1.inOut"
+                });
+            }
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+            if (typingLogo) {
+                gsap.killTweensOf(typingLogo);
+                gsap.set(typingLogo, { y: 0 });
+            }
+        }
+
+        // ── Logo Animation (on bot reply) ──
+        function triggerLogoAnimation() {
+            const logo = chatLogo;
+            if (!logo) return;
+
+            const tl = gsap.timeline();
+            tl.to(logo, {
+                filter: "brightness(2) drop-shadow(0 0 25px rgba(99,102,241,1))",
+                scale: 1.15,
+                duration: 0.15,
+                ease: "power2.out"
+            })
+            .to(logo, {
+                y: -8,
+                duration: 0.07,
+                repeat: 5,
+                yoyo: true,
+                ease: "none"
+            })
+            .to(logo, {
+                filter: "brightness(1) drop-shadow(0 0 10px rgba(99,102,241,0.4))",
+                scale: 1,
+                y: 0,
+                duration: 0.4,
+                ease: "elastic.out(1, 0.4)"
+            });
+        }
+
+        // ── Enter key to send ──
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ── GSAP Entrance Animations ──
+        gsap.from('.chat-header', { y: -30, opacity: 0, duration: 0.6, ease: "power3.out" });
+        gsap.from('.welcome-screen', { scale: 0.9, opacity: 0, duration: 0.8, ease: "back.out(1.4)", delay: 0.3 });
+        gsap.from('.welcome-action-btn', {
+            y: 20, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.6
+        });
+        gsap.from('.suggestion-chip', {
+            y: 10, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power2.out", delay: 0.8
+        });
+        gsap.from('.chat-input-area', { y: 30, opacity: 0, duration: 0.5, ease: "power3.out", delay: 0.4 });
+
+        // ── Welcome logo floating animation ──
+        const welcomeLogo = document.getElementById('welcome-logo-img');
+        if (welcomeLogo) {
+            gsap.to(welcomeLogo, {
+                y: -8,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        }
+    </script>
+</body>
+
+</html>
