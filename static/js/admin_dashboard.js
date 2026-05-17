@@ -514,6 +514,7 @@ $(document).ready(function() {
         formData.append('title', title);
         formData.append('description', description);
         formData.append('video_file', videoFile);
+        formData.append('is_active', 'true');
 
         $('#upload-btn').prop('disabled', true);
         $('#upload-progress').show();

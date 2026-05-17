@@ -22,6 +22,7 @@ from apps.bookings.customer_views import (
     NearbyMechanicListView, CustomerBookingCreateView, CustomerBookingListView,
     CustomerBookingDetailView, CustomerSelectMechanicView, CustomerBookingCancelView,
     CustomerConfirmPaymentView, CustomerRatingCreateView, CustomerStatsView,
+    StripeCheckoutSessionCreateView, StripePaymentSuccessView, StripePaymentCancelView,
 )
 from apps.bookings.chat_views import (
     BookingChatListView, BookingChatSendView, BookingUnreadCountView,
@@ -70,6 +71,9 @@ urlpatterns = [
     path('customer/bookings/<int:pk>/select-mechanic/', CustomerSelectMechanicView.as_view(), name='customer_select_mechanic'),
     path('customer/bookings/<int:pk>/cancel/', CustomerBookingCancelView.as_view(), name='customer_booking_cancel'),
     path('customer/bookings/<int:pk>/confirm-payment/', CustomerConfirmPaymentView.as_view(), name='customer_confirm_payment'),
+    path('customer/bookings/<int:pk>/stripe-payment/', StripeCheckoutSessionCreateView.as_view(), name='stripe_payment'),
+    path('customer/bookings/<int:pk>/payment-success/', StripePaymentSuccessView.as_view(), name='stripe_payment_success'),
+    path('customer/bookings/<int:pk>/payment-cancel/', StripePaymentCancelView.as_view(), name='stripe_payment_cancel'),
     path('customer/bookings/<int:pk>/rate/', CustomerRatingCreateView.as_view(), name='customer_rating'),
     path('customer/stats/', CustomerStatsView.as_view(), name='customer_stats'),
 

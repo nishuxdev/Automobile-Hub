@@ -5,6 +5,12 @@ from decimal import Decimal
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from django.conf import settings
+from django.shortcuts import redirect
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from apps.users.views import IsCustomer
 from apps.marketplace.models import MechanicProfile, MechanicService
@@ -260,6 +266,106 @@ class CustomerConfirmPaymentView(generics.GenericAPIView):
             'booking_status': booking.status,
             'service_otp': booking.service_otp,
         })
+
+
+class StripeCheckoutSessionCreateView(generics.GenericAPIView):
+    """
+    POST /auth/customer/bookings/<pk>/stripe-payment/
+    Creates a Stripe Checkout session and returns the checkout URL.
+    """
+    permission_classes = (IsCustomer,)
+
+    def post(self, request, pk):
+        try:
+            booking = Booking.objects.get(pk=pk, customer=request.user)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if booking.status != 'ASSIGNED':
+            return Response(
+                {'error': f'Payment can only be made for ASSIGNED bookings. Current: {booking.status}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        domain = request.build_absolute_uri('/')[:-1]
+        success_url = domain + f'/auth/customer/bookings/{booking.id}/payment-success/?session_id={{CHECKOUT_SESSION_ID}}'
+        cancel_url = domain + f'/auth/customer/bookings/{booking.id}/payment-cancel/'
+
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'inr',
+                            'unit_amount': int(booking.total_amount * 100),
+                            'product_data': {
+                                'name': f'Service Booking #{booking.id}',
+                            },
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url=success_url,
+                cancel_url=cancel_url,
+                client_reference_id=str(booking.id),
+            )
+            return Response({'checkout_url': checkout_session.url})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StripePaymentSuccessView(APIView):
+    """
+    GET /auth/customer/bookings/<pk>/payment-success/
+    Handles successful Stripe payment redirect.
+    """
+    permission_classes = []
+
+    def get(self, request, pk):
+        session_id = request.query_params.get('session_id')
+        if not session_id:
+            return Response({'error': 'Session ID not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.payment_status == 'paid':
+                try:
+                    booking = Booking.objects.get(pk=pk)
+                except Booking.DoesNotExist:
+                    return Response({'error': 'Booking not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+                if booking.status == 'ASSIGNED':
+                    import uuid
+                    txn_id = session.payment_intent or f"TXN-{uuid.uuid4().hex[:12].upper()}"
+                    Payment.objects.get_or_create(
+                        booking=booking,
+                        defaults={
+                            'transaction_id': txn_id,
+                            'amount': booking.total_amount,
+                            'status': 'SUCCESS',
+                        }
+                    )
+                    booking.status = 'PAID'
+                    booking.save()
+
+                return redirect('/customer/dashboard/?success=true')
+            else:
+                return redirect('/customer/dashboard/')
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StripePaymentCancelView(APIView):
+    """
+    GET /auth/customer/bookings/<pk>/payment-cancel/
+    Handles cancelled Stripe payment redirect.
+    """
+    permission_classes = []
+
+    def get(self, request, pk):
+        return redirect('/customer/dashboard/')
 
 
 # ───────────────────── Cancellation ──────────────────────────────────

@@ -9,6 +9,17 @@ $(document).ready(function () {
     fetchActiveBooking();
     loadProfile();
 
+    // Check if redirecting back from successful Stripe payment
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+        switchToSection('section-book');
+        $('[id^="booking-step-"]').hide();
+        $('#booking-step-success').show();
+        updateStepIndicator(5);
+        // Clear query parameters from URL so reloading doesn't keep showing success
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     // Fetch current user ID for chat
     $.ajax({
         url: '/auth/me/', type: 'GET',
@@ -295,21 +306,23 @@ $(document).ready(function () {
 
     window.confirmPayment = function () {
         if (!currentBookingId) return;
-        $('#confirm-pay-btn').text('Processing...').prop('disabled', true);
+        $('#confirm-pay-btn').text('Redirecting to Stripe...').prop('disabled', true);
         $.ajax({
-            url: `/auth/customer/bookings/${currentBookingId}/confirm-payment/`,
+            url: `/auth/customer/bookings/${currentBookingId}/stripe-payment/`,
             type: 'POST',
             headers: { 'Authorization': 'Bearer ' + token },
             contentType: 'application/json',
             data: JSON.stringify({}),
-            success: function () {
-                $('[id^="booking-step-"]').hide();
-                $('#booking-step-success').fadeIn(300);
-                updateStepIndicator(5);
-                fetchStats();
+            success: function (resp) {
+                if (resp.checkout_url) {
+                    window.location.href = resp.checkout_url;
+                } else {
+                    alert('Failed to initiate Stripe Checkout.');
+                    $('#confirm-pay-btn').text('💳 Confirm & Pay').prop('disabled', false);
+                }
             },
             error: function (xhr) {
-                alert(xhr.responseJSON?.error || 'Payment failed.');
+                alert(xhr.responseJSON?.error || 'Payment initiation failed.');
                 $('#confirm-pay-btn').text('💳 Confirm & Pay').prop('disabled', false);
             }
         });
@@ -422,13 +435,19 @@ $(document).ready(function () {
     };
 
     window.payForBooking = function (id) {
-        if (!confirm('Confirm payment for this booking?')) return;
+        if (!confirm('Redirect to Stripe to pay for this booking?')) return;
         $.ajax({
-            url: `/auth/customer/bookings/${id}/confirm-payment/`, type: 'POST',
+            url: `/auth/customer/bookings/${id}/stripe-payment/`, type: 'POST',
             headers: { 'Authorization': 'Bearer ' + token },
             contentType: 'application/json', data: '{}',
-            success: function () { fetchBookings(); fetchStats(); alert('Payment confirmed!'); },
-            error: function (xhr) { alert(xhr.responseJSON?.error || 'Payment failed.'); }
+            success: function (resp) {
+                if (resp.checkout_url) {
+                    window.location.href = resp.checkout_url;
+                } else {
+                    alert('Failed to initiate Stripe Checkout.');
+                }
+            },
+            error: function (xhr) { alert(xhr.responseJSON?.error || 'Stripe payment failed.'); }
         });
     };
 
